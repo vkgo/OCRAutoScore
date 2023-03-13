@@ -2,6 +2,8 @@
 
 此仓库为大创集成仓库，用于将各模块按照流程图一个个完成，并留下输入输出相关接口、文档。
 
+[TOC]
+
 ## 1 总流程图
 
 ![系统流程图](README.assets/系统流程图.jpg)
@@ -89,6 +91,14 @@ if __name__ == "__main__":
             print("判断结果: ", (answer, predict, "error")[index])
 ```
 
-## 3 关于协同开发
+## 3 文件目录说明
 
-每次进行代码修改前，将代码分支pull下来，修改后记得提交。
+```shell
+OCRAutoScore
++----scoreblocks # 填空题、选择题、作文的批改模型文件夹
+|    +----fillblankmodel.py # 填空题批改模型
++----README.assets # README的图片文件夹
++----README.md # 仓库说明文件
++----.gitignore # git忽略的文件夹、文件
+```
+
