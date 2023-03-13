@@ -89,3 +89,6 @@ if __name__ == "__main__":
             print("判断结果: ", (answer, predict, "error")[index])
 ```
 
+## 3 关于协同开发
+
+每次进行代码修改前，将代码分支pull下来，修改后记得提交。
