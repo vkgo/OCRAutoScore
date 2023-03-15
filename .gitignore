@@ -3,3 +3,25 @@
 scoreblocks/MSPLM/debertav3/*
 scoreblocks/MSPLM/prediction/*
 scoreblocks/MSPLM/实验效果.xlsx
+
+# dependencies
+score_web/node_modules
+/.pnp
+.pnp.js
+
+# testing
+score_web/coverage
+
+# production
+score_web/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
