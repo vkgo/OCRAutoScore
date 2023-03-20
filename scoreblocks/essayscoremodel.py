@@ -41,7 +41,7 @@ def init_weights(m):
         torch.nn.init.xavier_uniform(m.weight)
         m.bias.data.fill_(7)
 class model:
-    def __int__(self):
+    def __init__(self):
         # initialize arguments
         p = configargparse.ArgParser(default_config_files=["MSPLM/ini/p1.ini"])
         args = _initialize_arguments(p)
@@ -54,7 +54,9 @@ class model:
         self.chunk_sizes = []
         self.bert_batch_sizes = []
         # 载入模型
-        self.bert_regression_by_word_document = torch.load('./MSPLM/prediction/p1/val0test1/best_total.bin')
+        self.bert_regression_by_word_document = mainplm(self.args)
+        self.bert_regression_by_word_document.load_state_dict(torch.load('./MSPLM/prediction/p1/val0test1/best_total.bin'))
+        self.bert_regression_by_word_document.to(self.args['device'])
         self.bert_regression_by_word_document.eval()
 
         # these are used to plot the Training Curve Chart
@@ -108,5 +110,6 @@ class model:
 
 if __name__ == '__main__':
     model = model()
-    valdata = ['我是一个好孩子', '我是一个坏孩子']
+    text = """@PERCENT1 of people agree that computers make life less complicated. I also agree with this. Using computers teaches hand-eye coordination, gives people the ability to learn about faraway places and people, and lets people talk online with other people. I think that these are all very important. Why wouldn't you want to have strong hand-eye coordination? I think this a very important skill. Computers help teach hand-eye coordination and they keep it strong. While you're looking at the screen your hand is moving the mouse where you want it to go. Good hand-eye coordination is used for a lot of things; mostly everything. If you play some sports like baseball, hand-eye is one of the most important elements. Why not make that stronger off of the feild? Also, hand-eye can be used to @ORGANIZATION1 while taking notes. Hand-eye is involved with almost everything you do. you can't have a poor hand-eye coordination or else you won't be able to function properly. @NUM1 out of @NUM2 doctors agree that hand-eye very important for healthy living. I love to travel, but I want to know about the place I'm going to before I get on the phone to go there." said @PERSON1, a science teacher at @ORGANIZATION1. He feels the way, I'm sure, a lot of people feel. They want to know about the place they are going to and they want it to be current. The computer has plenty information about a lot of different places in the world. Some books don't offer as much information or they need to be updated. Computers are also very good for learning about other cultures and traditions. No one wants to be ignorant right? People want to know what's going on in the world quick and easy. The computer does this. I remember when I was about @NUM2, our phone broke in our house. We couldn't go out and get one right away either. The only way we were able to communicate with our family and friends was by computer. The computer made it easier to e-mail everyone and tell them why we weren't answering our house phone. This happens more often than you think. People need to communicate through computer a lot. At work, if you need to talk to an employee or co-worker and you can't leave your desk, you can just e-mail the information to them. @NUM4 out of @NUM2 employees say that it is much faster and easier to e-mail information as opposed to talking them on the phone or in person. A lot of people agree that computer make life a lot easier. Computers teach hand-eye coordination and they let you communicate with other people. The most critical reason is that computers let people learn about faraway places and people. You can make a difference in the way people feel about computers. Write to your local newspaper. It's now or never!"""
+    valdata = ['我是一个好孩子', '我是一个坏孩子', text]
     print(model.getscore(valdata))
