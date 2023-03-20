@@ -96,7 +96,13 @@ if __name__ == "__main__":
 ```shell
 OCRAutoScore
 +----scoreblocks # 填空题、选择题、作文的批改模型文件夹
+|    CharacterRecognition
+|    |    +----SpinalVGG.pth # SpinalVGG模型
+|    |    +----WaveMix.pth # WaveMix模型
+|    |    +----example # 测试图片
+|    +----essayscoremodel.py # 
 |    +----fillblankmodel.py # 填空题批改模型
+|    +----singleCharacterRecognition.py # 单字母识别模型
 +----README.assets # README的图片文件夹
 +----README.md # 仓库说明文件
 +----.gitignore # git忽略的文件夹、文件
