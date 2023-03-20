@@ -8,6 +8,7 @@ from lossfunctions import multi_loss
 import pandas as pd
 import matplotlib.pyplot as plt
 import math
+from torch.cuda.amp import autocast, GradScaler
 
 class AESmodel():
     def __init__(self, traindata, valdata, testdata, foldname, args=None):
@@ -74,6 +75,7 @@ class AESmodel():
     def validate(self, valdata, e=-1, mode='val'):
         self.bert_regression_by_word_document.eval()
         self.bert_regression_by_chunk.eval()
+        scaler = GradScaler()
         with torch.no_grad():
             target_scores = None
             if isinstance(valdata, tuple) and len(valdata) == 2:
@@ -97,25 +99,27 @@ class AESmodel():
                 batch_doctok_token_indexes = doctok_token_indexes[i:i + self.args['batch_size']].to(
                     device=self.args['device'])
                 batch_target_scores = target_scores[i:i + self.args['batch_size']].to(device=self.args['device'])
-                batch_doctok_predictions = self.bert_regression_by_word_document(batch_doctok_token_indexes,
+                with autocast():
+                    batch_doctok_predictions = self.bert_regression_by_word_document(batch_doctok_token_indexes,
                                                                                  device=self.args['device'])
                 batch_doctok_predictions = torch.squeeze(batch_doctok_predictions)
 
                 batch_predictions = batch_doctok_predictions
-                for chunk_index in range(len(self.chunk_sizes)):
-                    batch_document_tensors_chunk = chunk_token_indexes_list[chunk_index][
-                                                   i:i + self.args['batch_size']].to(
-                        device=self.args['device'])
-                    batch_predictions_chunk = self.bert_regression_by_chunk(
-                        batch_document_tensors_chunk,
-                        device=self.args['device'],
-                        plm_batch_size=self.bert_batch_sizes[chunk_index]
-                    )
-                    batch_predictions_chunk = torch.squeeze(batch_predictions_chunk)
-                    batch_predictions = torch.add(batch_predictions, batch_predictions_chunk)  # 多个chunk的分加起来
+                # for chunk_index in range(len(self.chunk_sizes)):
+                #     batch_document_tensors_chunk = chunk_token_indexes_list[chunk_index][
+                #                                    i:i + self.args['batch_size']].to(
+                #         device=self.args['device'])
+                #     batch_predictions_chunk = self.bert_regression_by_chunk(
+                #         batch_document_tensors_chunk,
+                #         device=self.args['device'],
+                #         plm_batch_size=self.bert_batch_sizes[chunk_index]
+                #     )
+                #     batch_predictions_chunk = torch.squeeze(batch_predictions_chunk)
+                #     batch_predictions = torch.add(batch_predictions, batch_predictions_chunk)  # 多个chunk的分加起来
                 if len(batch_predictions.shape) == 0: # 证明只有一个tensor，不构成list
                     batch_predictions = torch.tensor([batch_predictions], device=self.args['device'])
-                loss = self.multi_loss(batch_target_scores.unsqueeze(1), batch_predictions.unsqueeze(1))
+                with autocast():
+                    loss = self.multi_loss(batch_target_scores.unsqueeze(1), batch_predictions.unsqueeze(1))
                 acculation_loss += loss.item()
 
                 predictions[i:i + self.args['batch_size']] = batch_predictions
@@ -160,7 +164,7 @@ class AESmodel():
         self.bert_regression_by_word_document.to(device=self.args['device'])
         self.bert_regression_by_chunk.to(device=self.args['device'])
         self.multi_loss.to(device=self.args['device'])
-
+        scaler = GradScaler()
         for e in range(epoch):
             print('*' * 20 + f'epoch: {e + 1}' + '*' * 20)
             self.adjust_learning_rate(e, self.lr)
@@ -190,28 +194,38 @@ class AESmodel():
                 self.optim.zero_grad()
                 batch_doctok_token_indexes = doctok_token_indexes[i:i + self.args['batch_size']].to(device=self.args['device'])
                 batch_target_scores = target_scores[i:i + self.args['batch_size']].to(device=self.args['device'])
-                batch_doctok_predictions = self.bert_regression_by_word_document(batch_doctok_token_indexes, device=self.args['device'])
+                with autocast():
+                    batch_doctok_predictions = self.bert_regression_by_word_document(batch_doctok_token_indexes, device=self.args['device'])
                 batch_doctok_predictions = torch.squeeze(batch_doctok_predictions)
 
 
                 batch_predictions = batch_doctok_predictions
-                for chunk_index in range(len(self.chunk_sizes)):
-                    batch_document_tensors_chunk = chunk_token_indexes_list[chunk_index][i:i + self.args['batch_size']].to(
-                        device=self.args['device'])
-                    batch_predictions_chunk = self.bert_regression_by_chunk(
-                        batch_document_tensors_chunk,
-                        device=self.args['device'],
-                        plm_batch_size=self.bert_batch_sizes[chunk_index]
-                    )
-                    batch_predictions_chunk = torch.squeeze(batch_predictions_chunk)
-                    batch_predictions = torch.add(batch_predictions, batch_predictions_chunk) # 多个chunk的分加起来
+                # for chunk_index in range(len(self.chunk_sizes)):
+                #     batch_document_tensors_chunk = chunk_token_indexes_list[chunk_index][i:i + self.args['batch_size']].to(
+                #         device=self.args['device'])
+                #     batch_predictions_chunk = self.bert_regression_by_chunk(
+                #         batch_document_tensors_chunk,
+                #         device=self.args['device'],
+                #         plm_batch_size=self.bert_batch_sizes[chunk_index]
+                #     )
+                #     batch_predictions_chunk = torch.squeeze(batch_predictions_chunk)
+                #     batch_predictions = torch.add(batch_predictions, batch_predictions_chunk) # 多个chunk的分加起来
 
                 if len(batch_predictions.shape) == 0: # 证明只有一个tensor，不构成list
                     batch_predictions = torch.tensor([batch_predictions], device=self.args['device'])
-                loss = self.multi_loss(batch_target_scores.unsqueeze(1), batch_predictions.unsqueeze(1))
+                with autocast():
+                    loss = self.multi_loss(batch_target_scores.unsqueeze(1), batch_predictions.unsqueeze(1))
+                
+                
+                
+                
                 loss.requires_grad_(True)
-                loss.backward()
-                self.optim.step()
+                # loss.backward()
+                scaler.scale(loss).backward()
+                
+                # self.optim.step()
+                scaler.step(self.optim)
+                scaler.update()
                 acculation_loss += loss.item()
 
                 predictions[i:i + self.args['batch_size']] = batch_predictions
