@@ -100,7 +100,9 @@ OCRAutoScore
 |    |    +----SpinalVGG.pth # SpinalVGG模型
 |    |    +----WaveMix.pth # WaveMix模型
 |    |    +----example # 测试图片
-|    +----essayscoremodel.py # 
+|    fillblank_testdata # 填空题测试图片
+|    MSPLM # AES模型 
+|    +----essayscoremodel.py # 作文评分模型
 |    +----fillblankmodel.py # 填空题批改模型
 |    +----singleCharacterRecognition.py # 单字母识别模型
 +----README.assets # README的图片文件夹
