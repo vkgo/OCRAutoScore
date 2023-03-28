@@ -8,6 +8,7 @@ import math
 class Model:
     def __init__(self, debug=False):
         self.rects = []  # 记录一张图可以标记分割的矩阵 格式为[x, y, w, h]
+        self.crop_img = [] # 保存分割的图片
         self.img = None  # 图片
         self.debug = debug  # debug模式
         self.name = ''  # 图片名
@@ -16,10 +17,11 @@ class Model:
         binary = self.__preProcessing(img_path, name)
         horizon = self.__detectLines(binary)
         self.__contourExtraction(horizon)
-        self.__segmentation()
+        result = self.__segmentation()
         self.rects.clear()
         self.img = None
         self.name = ''
+        return result
 
     def __preProcessing(self, img_path, name):  # 图片预处理，输出二值图
         img = cv2.imread(img_path)
@@ -110,8 +112,9 @@ class Model:
                 x, y, w, h = rect
                 crop_img = self.img[y:y + h, x:x + w]
                 crop_img = crop_img.copy()
-                cv2.imwrite('./res/{}-{}.png'.format(self.name, idx + 1), crop_img)
-                pass
+                self.crop_img.append(crop_img)
+                # cv2.imwrite('./res/{}-{}.png'.format(self.name, idx + 1), crop_img)
+                return self.crop_img
 
     @staticmethod
     def __cmp_rect(a, b):
@@ -141,4 +144,4 @@ if __name__ == '__main__':
     for i in folder:
         pic_path = os.path.join(path, i)
         name_ = i[:-4]
-        model.process(pic_path, name_)
+        res = model.process(pic_path, name_)  # res存储分割的图片
