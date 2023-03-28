@@ -9,8 +9,7 @@ class Model:
     def __init__(self, path, name):
         self.model_name = name
         self.model = torch.load(path)
-        self.model.cuda()
-        self.model.eval()
+        self.model.cpu()
         self.transforms = transforms.Compose([torchvision.transforms.ToTensor(),
                                               torchvision.transforms.Normalize(
                                                   (0.1307,), (0.3081,))])
@@ -37,8 +36,9 @@ class Model:
         # 格式转换
         inp = self.transforms(binary)
         inp = torch.unsqueeze(inp, 0)
-        inp = inp.cuda()
+        inp = inp
         # 检测
+        self.model.eval()
         with torch.no_grad():
             out = self.model(inp)
         return out
