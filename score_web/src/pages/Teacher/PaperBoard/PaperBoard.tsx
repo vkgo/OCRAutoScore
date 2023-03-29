@@ -48,7 +48,7 @@ const PaperBoard : React.FC = () => {
                 }
                 <div className="tag_container">
                     <img src={require("@/assets/time.png")} alt="上传时间图标"/>
-                    <span>{item.time}</span>
+                    <span>试卷发布时间 {item.time}</span>
                 </div>
             </div>
         )   
