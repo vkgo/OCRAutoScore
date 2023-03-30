@@ -1,0 +1,79 @@
+# 实验名称
+experiment: "CAN"
+
+# 随机种子
+seed: 20211024
+
+# 训练参数
+epochs: 240
+batch_size: 4
+workers: 0
+train_parts: 1
+valid_parts: 1
+valid_start: 0
+save_start: 0
+
+optimizer: Adadelta
+lr: 1
+lr_decay: cosine
+step_ratio: 10
+step_decay: 5
+eps: 1e-6
+weight_decay: 1e-4
+beta: 0.9
+
+dropout: True
+dropout_ratio: 0.5
+relu: True
+gradient: 100
+gradient_clip: True
+use_label_mask: False
+
+# 训练数据
+train_image_path: 'datasets/CROHME/train_images.pkl'
+train_label_path: 'datasets/CROHME/train_labels.txt'
+
+eval_image_path: 'datasets/test_images/'
+eval_label_path: 'datasets/test_labels.txt'
+
+word_path: './CAN/words_dict.txt'
+
+# collate_fn
+collate_fn: collate_fn
+
+densenet:
+  ratio: 16
+  growthRate: 24
+  reduction: 0.5
+  bottleneck: True
+  use_dropout: True
+
+encoder:
+  input_channel: 1
+  out_channel: 684
+
+decoder:
+  net: AttDecoder
+  cell: 'GRU'
+  input_size: 256
+  hidden_size: 256
+
+counting_decoder:
+  in_channel: 684
+  out_channel: 111
+
+attention:
+  attention_dim: 512
+  word_conv_kernel: 1
+
+attention_map_vis_path: 'vis/attention_map'
+counting_map_vis_path: 'vis/counting_map'
+
+whiten_type: None
+max_step: 256
+
+optimizer_save: False
+finetune: False
+checkpoint_dir: 'checkpoints'
+checkpoint: "./checkpoints/demo.pth"
+log_dir: 'logs'
