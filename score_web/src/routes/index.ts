@@ -4,6 +4,9 @@ import TeacherDashBoard from '@/pages/Teacher/DashBoard/DashBoard'
 import AddPaperBoard from '@/pages/Teacher/AddPaperBoard/AddPaperBoard'
 import PaperBoard from '@/pages/Teacher/PaperBoard/PaperBoard'
 import PaperDetail from '@/pages/Teacher/PaperDetail/PaperDetail'
+import StudentDashBoard from '@/pages/Student/DashBoard/DashBoard'
+import PaperLibrary from '@/pages/Student/PaperLibrary/PaperLibrary';
+
 const routes:RouteConfig = [
     {
         path: '/login',
@@ -15,16 +18,27 @@ const routes:RouteConfig = [
         component:TeacherDashBoard,
         routes: [
             {
-                path: '/teacher/add',
+                path: '/teacher/list', 
+                component: PaperBoard,
+                exact: true
+            },
+            {
+                path: '/teacher/list/add',
                 component: AddPaperBoard,
             },
             {
-                path: '/teacher/list', 
-                component: PaperBoard,
-            },
-            {
-                path: '/teacher/detail/:id',
+                path: '/teacher/list/detail/:id',
                 component: PaperDetail
+            }
+        ]
+    },
+    {
+        path: '/student',
+        component: StudentDashBoard,
+        routes: [
+            {
+                path: '/student/papers',
+                component: PaperLibrary
             }
         ]
     }
