@@ -3,10 +3,10 @@ import Login from '@/pages/Login/Login'
 import TeacherDashBoard from '@/pages/Teacher/DashBoard/DashBoard'
 import AddPaperBoard from '@/pages/Teacher/AddPaperBoard/AddPaperBoard'
 import PaperBoard from '@/pages/Teacher/PaperBoard/PaperBoard'
-import PaperDetail from '@/pages/Teacher/PaperDetail/PaperDetail'
+import TeacherPaperDetail from '@/pages/Teacher/PaperDetail/PaperDetail'
 import StudentDashBoard from '@/pages/Student/DashBoard/DashBoard'
 import PaperLibrary from '@/pages/Student/PaperLibrary/PaperLibrary';
-
+import StudentPaperDetail from '@/pages/Student/PaperDetail/PaperDetail';
 const routes:RouteConfig = [
     {
         path: '/login',
@@ -28,7 +28,7 @@ const routes:RouteConfig = [
             },
             {
                 path: '/teacher/list/detail/:id',
-                component: PaperDetail
+                component: TeacherPaperDetail
             }
         ]
     },
@@ -38,7 +38,12 @@ const routes:RouteConfig = [
         routes: [
             {
                 path: '/student/papers',
-                component: PaperLibrary
+                component: PaperLibrary,
+                exact: true
+            },
+            {
+                path: '/student/papers/detail/:id',
+                component: StudentPaperDetail
             }
         ]
     }

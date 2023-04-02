@@ -5,7 +5,7 @@ const PaperLibrary: React.FC = () => {
     return (
         <div>
             <h2>题库</h2>
-            <PaperList/>
+            <PaperList baseUrl='/student/papers/detail/'/>
         </div>
     )
 }

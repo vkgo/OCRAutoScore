@@ -1,7 +1,13 @@
 import PaperListItem from "@/ts/interface/paperListItem_interface";
 import React from "react";
 import {List, Button } from 'antd'
-const PaperList: React.FC = () => {
+import './PaperList.less'
+import { useHistory } from 'react-router-dom';
+interface PaperListProps {
+    baseUrl:string
+}
+const PaperList: React.FC<PaperListProps> = (props) => {
+    const history = useHistory()
     let dataSource: PaperListItem[] = [
         {
             id: 0,
@@ -27,7 +33,7 @@ const PaperList: React.FC = () => {
 
     const descriptionHtml = (item: PaperListItem) => {
         return (
-            <div className="description_container">
+            <div className="paper_list_description_container">
                 <div className="tag_container">
                     <img src={require("@/assets/hot.png")} alt="热度图标"/>
                     <span>共有{item.hot}学生做过</span>
@@ -50,14 +56,14 @@ const PaperList: React.FC = () => {
         <List
             dataSource={dataSource}
             size="large"
-            renderItem={(item: PaperListItem)=>(
+            renderItem={(item: PaperListItem,index)=>(
                 <List.Item key={item.id}>
                     <List.Item.Meta
                         avatar={<img src={require("@/assets/paper.png")} alt="试卷图标"/>}
                         title={<span>{item.title}</span>}
                         description={descriptionHtml(item)}
                     />
-                    <Button type="primary">点击查看</Button>
+                    <Button type="primary" onClick={()=>{history.push(props.baseUrl+index)}}>点击查看</Button>
                 </List.Item>
             )}    
         />

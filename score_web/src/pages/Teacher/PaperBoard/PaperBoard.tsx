@@ -7,9 +7,9 @@ import { useHistory } from 'react-router-dom';
 const PaperBoard : React.FC = () => {
     const history = useHistory()
     return (
-        <div>
+        <div className="teacher_PaperBoard">
             <h2>我发布过的试卷</h2>
-            <PaperList/> 
+            <PaperList baseUrl="/teacher/list/detail/"/> 
             <div className="button_container">
                 <Button 
                     type="primary" 

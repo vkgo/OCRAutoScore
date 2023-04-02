@@ -8,7 +8,7 @@ const breadcrumbNameMap: Record<string, string> = {
     '/teacher': '首页',
     '/teacher/list': '查看试卷列表',
     '/teacher/list/add': '添加试卷',
-    '/teacher/list/detail/:id': '查看试卷详情',
+    '/teacher/list/detail': '查看试卷详情',
 };
 interface BreadcrumbItemInterface {
     title: string | JSX.Element,
@@ -20,13 +20,17 @@ const DashBoard: React.FC<DashBoardProps> = (props) => {
     const pathSnippets = props.location.pathname.split('/').filter((i) => i);
     console.log('pathSnippets:', pathSnippets)
 
-    const breadcrumbItems : BreadcrumbItemInterface[] = pathSnippets.map((_, index) => {
-        const url = `/${pathSnippets.slice(0, index + 1).join('/')}`;
-        return {
+    let breadcrumbItems : BreadcrumbItemInterface[] = [];
+    for(let i = 0; i < pathSnippets.length; i++) {
+        const url = `/${pathSnippets.slice(0, i + 1).join('/')}`;
+        if(!(url in breadcrumbNameMap)) continue;
+        breadcrumbItems.push({
             key: url,
-            title: url === '/teacher'? '首页':<Link to={url}>{breadcrumbNameMap[url]}</Link>,
-        };
-    });
+            title: url === '/teacher' || url==='/teacher/list/detail'? breadcrumbNameMap[url] :<Link to={url}>{breadcrumbNameMap[url]}</Link>,
+        });
+    };
+
+
 
     return (
         <div className="techer_dashboard_body">
