@@ -9,7 +9,7 @@ import PaperLibrary from '@/pages/Student/PaperLibrary/PaperLibrary';
 import StudentPaperDetail from '@/pages/Student/PaperDetail/PaperDetail';
 const routes:RouteConfig = [
     {
-        path: '/login',
+        path: '/',
         exact: true,
         component: Login,
     },
