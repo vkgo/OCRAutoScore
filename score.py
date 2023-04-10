@@ -11,7 +11,7 @@ class scoresystem:
         # 模型
         self.outer_segmentation = OuterSegmentation.OuterSegmentation()
         self.blank_segmentation = BlankSegmentation.Model()
-        self.single_character_recognition = SingleCharacterRecognition.Model('./scoreblocks/CharacterRecognition/SpinalVGG.pth', 'SpinalVGG')
+        self.single_character_recognition = SingleCharacterRecognition.Model('./scoreblocks/CharacterRecognition/SpinalVGG_dict.pth', 'SpinalVGG')
         self.fill_blank_model = FillBlankModel.model()
         self.candemo = CanDemo.model()
         self.essay_score_model = EssayScoreModel.model()

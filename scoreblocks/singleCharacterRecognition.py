@@ -1,15 +1,31 @@
+import sys
+
 import torch
 import cv2
 import torchvision
 from torchvision import transforms
 import os
+from scoreblocks.CharacterRecognition.model import SpinalVGG
+from scoreblocks.CharacterRecognition.model_new import *
 
 
 class Model:
     def __init__(self, path, name):
         self.model_name = name
-        self.model = torch.load(path)
-        self.model.cpu()
+        if self.model_name == 'WaveMix':
+            self.model = WaveMix(
+                num_classes=27,
+                depth=7,
+                mult=2,
+                ff_channel=256,
+                final_dim=256,
+                dropout=0.5
+            )
+        elif self.model_name == 'SpinalVGG':
+            self.model = SpinalVGG(27)
+        self.model.load_state_dict(torch.load(path))
+        # self.model.cpu()
+        self.model.eval()
         self.transforms = transforms.Compose([torchvision.transforms.ToTensor(),
                                               torchvision.transforms.Normalize(
                                                   (0.1307,), (0.3081,))])
@@ -45,11 +61,11 @@ class Model:
 
 
 if __name__ == '__main__':
-    selection = {'SpinalVGG': './CharacetrRecognition/SpinalVGG.pth',
-                 'WaveMix': './CharacterRecognition/WaveMix.pth'}
+    selection = {'SpinalVGG': './CharacterRecognition/SpinalVGG_dict.pth',
+                 'WaveMix': './CharacterRecognition/WaveMix_dict.pth'}
 
     m = Model(selection['SpinalVGG'], 'SpinalVGG')
-    img_path = input("输入识别单字母图片的文件夹路径") 
+    img_path = input("输入识别单字母图片的文件夹路径")
     # img_path = './CharacetrRecognition/example'
     acc = 0
     sum_ = 0
@@ -62,4 +78,4 @@ if __name__ == '__main__':
             # 输出分类结果
             res = chr(out.argmax(1) + 64)
             acc += res == i[0]
-            print("res: {} real: {} {} {}".format(res, i[0], res == i[0], acc/sum_))
+            print("res: {} real: {} {} {}".format(res, i[0], res == i[0], acc / sum_))
