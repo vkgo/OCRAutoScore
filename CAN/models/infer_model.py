@@ -2,16 +2,14 @@ import os
 import cv2
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import time
 import math
 
-from models.densenet import DenseNet
-from models.attention import Attention
-from models.decoder import PositionEmbeddingSine
-from models.counting import CountingDecoder as counting_decoder
-from counting_utils import gen_counting_label
-from utils import draw_attention_map, draw_counting_map
+from CAN.models.densenet import DenseNet
+from CAN.models.attention import Attention
+from CAN.models.decoder import PositionEmbeddingSine
+from CAN.models.counting import CountingDecoder as counting_decoder
+from CAN.counting_utils import gen_counting_label
+from CAN.utils import draw_attention_map, draw_counting_map
 
 
 class Inference(nn.Module):

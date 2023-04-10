@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
-from models.attention import Attention
+from CAN.models.attention import Attention
 import math
-import numpy as np
-from counting_utils import gen_counting_label
 
 
 class PositionEmbeddingSine(nn.Module):

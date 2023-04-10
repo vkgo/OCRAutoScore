@@ -46,7 +46,7 @@ class Model:
 
 if __name__ == '__main__':
     selection = {'SpinalVGG': './CharacetrRecognition/SpinalVGG.pth',
-                 'WaveMix': './CharacetrRecognition/SpinalVGG.pth'}
+                 'WaveMix': './CharacterRecognition/WaveMix.pth'}
 
     m = Model(selection['SpinalVGG'], 'SpinalVGG')
     img_path = input("输入识别单字母图片的文件夹路径") 

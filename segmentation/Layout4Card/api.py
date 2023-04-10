@@ -12,7 +12,7 @@ CLS_ID_NAME_MAP = {
 }
 class OuterSegmentation:
     def __init__(self):
-        self.model = YOLO(model='./runs/detect/train3/weights/best.pt')
+        self.model = YOLO(model='./segmentation/Layout4Card/runs/detect/train3/weights/best.pt')
 
     def get_segmentation(self, img):
         results =  self.model.predict(source=img, imgsz=640, save=False)

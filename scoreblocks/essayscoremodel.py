@@ -3,8 +3,8 @@ import torch.nn as nn
 from transformers import AutoModel
 import configargparse
 from transformers import AutoTokenizer
-from MSPLM.encoder import encode_documents
-from MSPLM.plms import mainplm
+from scoreblocks.MSPLM.encoder import encode_documents
+from scoreblocks.MSPLM.plms import mainplm
 from torch.cuda.amp import autocast
 
 

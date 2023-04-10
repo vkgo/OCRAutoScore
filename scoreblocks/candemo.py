@@ -3,8 +3,8 @@ import numpy as np
 from CAN.utils import load_config, load_checkpoint, compute_edit_distance
 from CAN.dataset import Words
 import sys
-sys.path.append('./CAN/')#
-from models.infer_model import Inference
+# sys.path.append('./CAN/')#
+from CAN.models.infer_model import Inference
 import cv2
 class model:
     def __init__(self):
