@@ -1,5 +1,3 @@
-import sys
-
 import torch
 import cv2
 import torchvision
