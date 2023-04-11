@@ -3,12 +3,13 @@
 scoreblocks/MSPLM/debertav3/*
 scoreblocks/MSPLM/prediction/*
 scoreblocks/MSPLM/实验效果.xlsx
-
+score_server/.idea
 # dependencies
 score_web/node_modules
 /.pnp
 .pnp.js
-
+__pycache__/
+migrations/
 # testing
 score_web/coverage
 
