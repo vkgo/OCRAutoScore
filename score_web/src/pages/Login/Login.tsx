@@ -15,9 +15,13 @@ const Login: React.FC = (props:any) => {
             let flag: boolean = await loginHttpRequest("api/login/")
             if(flag) {
                 if (form.getFieldValue("identity") === 'student') {
+                    window.sessionStorage.setItem("role", "student")
+                    window.sessionStorage.setItem("username", form.getFieldValue("username"))
                     props.history.push("student/papers")
                 }
                 else {
+                    window.sessionStorage.setItem("role", "student")
+                    window.sessionStorage.setItem("username", form.getFieldValue("username"))
                     props.history.push("teacher/list")
                 }
                 // props.history.push('')
