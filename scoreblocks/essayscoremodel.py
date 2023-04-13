@@ -43,7 +43,7 @@ def init_weights(m):
 class model:
     def __init__(self):
         # initialize arguments
-        p = configargparse.ArgParser(default_config_files=["MSPLM/ini/p1.ini"])
+        p = configargparse.ArgParser(default_config_files=["./scoreblocks/MSPLM/ini/p1.ini"])
         args = _initialize_arguments(p)
         print(f'device:{args.device} torch_version:{torch.__version__}')
 
@@ -55,7 +55,7 @@ class model:
         self.bert_batch_sizes = []
         # 载入模型
         self.bert_regression_by_word_document = mainplm(self.args)
-        self.bert_regression_by_word_document.load_state_dict(torch.load('./MSPLM/prediction/p1/val0test1/best_total.bin'))
+        self.bert_regression_by_word_document.load_state_dict(torch.load('./scoreblocks/MSPLM/prediction/p1/val0test1/best_total.bin'))
         self.bert_regression_by_word_document.to(self.args['device'])
         self.bert_regression_by_word_document.eval()
 

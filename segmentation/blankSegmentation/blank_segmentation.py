@@ -33,6 +33,24 @@ class Model:
         thresh, binary = cv2.threshold(blur, int(_ * 0.95), 255, cv2.THRESH_BINARY)
         return binary
 
+    def process_img(self, img):
+        self.__preProcessing_img(img)
+        binary = self.__preProcessing_img(img)
+        horizon = self.__detectLines(binary)
+        self.__contourExtraction(horizon)
+        result = self.__segmentation()
+        self.rects.clear()
+        self.img = None
+        return result
+
+    def __preProcessing_img(self, img):  # 图片预处理，输出二值图
+        self.img = img
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(gray, (5, 5), 1.5)
+        _, binary = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        thresh, binary = cv2.threshold(blur, int(_ * 0.95), 255, cv2.THRESH_BINARY)
+        return binary
+
     @staticmethod
     def __detectLines(img):  # 检测水平线
         horizon_k = int(math.sqrt(img.shape[1]) * 1.2)  # w
@@ -106,15 +124,15 @@ class Model:
                 cv2.putText(self.img, str(idx + 1), (x, y + 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
             cv2.imwrite('./debug/{}.png'.format(self.name), self.img)
         else:
-            if not os.path.exists('res'):
-                os.mkdir('res')
+            # if not os.path.exists('res'):
+            #     os.mkdir('res')
             for idx, rect in enumerate(self.rects):
                 x, y, w, h = rect
                 crop_img = self.img[y:y + h, x:x + w]
                 crop_img = crop_img.copy()
                 self.crop_img.append(crop_img)
                 # cv2.imwrite('./res/{}-{}.png'.format(self.name, idx + 1), crop_img)
-                return self.crop_img
+            return self.crop_img
 
     @staticmethod
     def __cmp_rect(a, b):

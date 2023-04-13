@@ -12,7 +12,7 @@ class model:
         # self.model=torch.load(path)
         self.params=load_config('./CAN/config.yaml')
         # params['device'] = device
-        self.words = Words('./CAN/words_dict.txt')
+        self.words = Words('./scoreblocks/CAN/words_dict.txt')
         self.params['word_num'] = len(self.words)
         self.params['device']='cpu'
         if 'use_label_mask' not in self.params:
