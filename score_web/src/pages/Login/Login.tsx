@@ -24,7 +24,6 @@ const Login: React.FC = (props:any) => {
                     window.sessionStorage.setItem("username", form.getFieldValue("username"))
                     props.history.push("teacher/list")
                 }
-                // props.history.push('')
             }
         }
     }
