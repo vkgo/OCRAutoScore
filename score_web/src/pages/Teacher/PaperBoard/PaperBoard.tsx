@@ -1,15 +1,30 @@
-import React from "react"
+import React, {useEffect, useState} from "react"
 import {Button } from 'antd'
 import {PlusCircleOutlined} from '@ant-design/icons'
 import './PaperBoard.less'
 import PaperList from "@/components/PaperList/PaperList"
 import { useHistory } from 'react-router-dom';
+import axios from "axios"
 const PaperBoard : React.FC = () => {
     const history = useHistory()
+    const [papers, setPapers] = useState([])
+    useEffect(()=>{
+        getPaperList()
+    }, [])
+    const getPaperList = async () => {
+        const result = await axios.request({
+            url: 'teacher/papers',
+            method: 'GET',
+            params: {"username": window.sessionStorage.getItem('username')}
+        })
+        if(result.data.msg === 'success') {
+            setPapers(result.data.papers)
+        }
+    }
     return (
         <div className="teacher_PaperBoard">
             <h2>我发布过的试卷</h2>
-            <PaperList baseUrl="/teacher/list/detail/"/> 
+            <PaperList baseUrl="/teacher/list/detail/" list={papers}/> 
             <div className="button_container">
                 <Button 
                     type="primary" 

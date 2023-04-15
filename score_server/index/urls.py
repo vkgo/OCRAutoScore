@@ -16,5 +16,7 @@ urlpatterns = [
     # 设置试卷答案
     path('paper/answer/add', views.ans_set),
     # 教师试卷列表
-    path('path/teacher/papers', views.showPapersForTeacher)
+    path('teacher/papers', views.showPapersForTeacher),
+    # 学生试卷列表
+    path('student/papers', views.showPaperForStudent),
 ]

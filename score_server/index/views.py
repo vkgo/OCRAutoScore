@@ -1,11 +1,10 @@
 import json
-
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-
 from index.models import Student, Teacher, Paper, PaperPhoto, Problem, Answer
 from utils.util import tid_maker
+from datetime import datetime
 
 
 @require_http_methods(["POST"])
@@ -123,4 +122,20 @@ def showPapersForTeacher(request):
     username = request.GET["username"]
     teacher = Teacher.objects.get(username=username)
     papers = Paper.objects.filter(teacher=teacher, name__isnull=False)
-    return JsonResponse({"msg":"success", "data": {papers.name}})
+    return JsonResponse(
+        {"msg": "success", "papers": [{"title": paper.name,
+                                       "time": datetime.fromisoformat(str(paper.created_at)).strftime(
+                                           "%Y-%m-%d %H:%M"),
+                                       "id": paper.id} for paper in papers]})
+
+
+@require_http_methods(["GET"])
+def showPaperForStudent(request):
+    papers = Paper.objects.filter(name__isnull=False)
+
+    return JsonResponse(
+        {"msg": "success", "papers": [{"title": paper.name,
+                                       "time": datetime.fromisoformat(str(paper.created_at)).strftime(
+                                           "%Y-%m-%d %H:%M"),
+                                       "id": paper.id, "teacher": paper.teacher.username}
+                                      for paper in papers]})
