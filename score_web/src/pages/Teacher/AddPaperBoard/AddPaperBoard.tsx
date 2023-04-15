@@ -1,12 +1,13 @@
-import { Button, Upload, Tree, InputNumber, Modal, Input} from 'antd';
+import { Button, Upload, Tree, InputNumber, Modal, Input, message, Alert,Space } from 'antd';
 import { PlusOutlined} from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import range from '@/util/range';
 import numToCN from '@/util/numToCN';
 import './AddPaperBoard.less'
-const {TextArea} = Input;
+import axios from 'axios';
 
+const {TextArea} = Input;
 /**
  * 配置试卷
  * - 大题数目
@@ -19,28 +20,78 @@ enum ModalContentState {
     setProblemAnswer
 }
 const AddPaperBoard: React.FC = () => {
+    // 上传图片相关
+    const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
     const [fileList, setFileList] = useState<UploadFile[]>([]);
-    const [isModalOpen, setIsModalOpen] = useState(ModalContentState.closed);
+
+    // 上传答案相关
+    const [isAnsModalOpen, setisAnsModalOpen] = useState(ModalContentState.closed);
     const [bigProblemNumber, setBigProblemNumber] = useState(1);
     const [smallProblemNumberPerBigProblemList, setSmallProblemNumberPerBigProblemList] = useState([]);
     const [answers, setAnswers] = useState([]);
     const [treeData, setTreeData] = useState([]);
+
+    // 重要参数
+    const [paperId, setPaperId] = useState(-1)
+    const [isSavePaper,setIsSavePaper] = useState(false);
+    const [paperName, setPaperName] = useState("")
+
+    const init = async() =>  {
+        if(paperId === -1) {
+            const result = await axios.request({
+                url: 'paper/add',
+                method: 'GET',
+                params: {
+                    username: window.sessionStorage.getItem('username')
+                }
+            })
+            console.log(result)
+            if(result.data.msg === 'success') {
+                // console.log("aaa ", result.data.data.paperId)
+                setPaperId(result.data.data.paperId)
+                // console.log("paperId", paperId)
+            }
+        }
+    }
+
+    const removePaper = async () => {
+        await axios.request({
+            url: 'paper/delete',
+            method:'GET',
+            params: {
+                paperId
+            }
+        })
+    }
+
+    useEffect(()=>{
+        init() 
+        return () => {
+            if (!isSavePaper && paperId !== -1) {
+                // console.log("bbb")
+                // console.log("paperId", paperId)
+                removePaper() 
+            }
+        }
+    },[])
+
     /**
      *  Modal 配置函数
      *  */ 
     
     // 打开Modal
     const showModal = () => {
-        setIsModalOpen(ModalContentState.setBigProblemNumber)
+        setisAnsModalOpen(ModalContentState.setBigProblemNumber)
     };
 
     // 点击ok, 当前值 + 1
-    const handleOk = () => {
-        if(isModalOpen === ModalContentState.setBigProblemNumber && bigProblemNumber !== smallProblemNumberPerBigProblemList.length) {
+    const handleAnsModalOk = () => {
+        if(isAnsModalOpen === ModalContentState.setBigProblemNumber && bigProblemNumber !== smallProblemNumberPerBigProblemList.length) {
             // 初始化小题的数组
             setSmallProblemNumberPerBigProblemList(Array(bigProblemNumber).fill(1))
         }
-        else if (isModalOpen === ModalContentState.setSmallProblemNumber) {
+        else if (isAnsModalOpen === ModalContentState.setSmallProblemNumber) {
             //判断是否要重新设置数组
             let flag = false;
             if(answers.length === bigProblemNumber){
@@ -68,19 +119,26 @@ const AddPaperBoard: React.FC = () => {
                 console.log(a)
                 setAnswers(a);
             }
-            
         }
-        setIsModalOpen(current=> current + 1 > ModalContentState.setProblemAnswer ? ModalContentState.closed : current + 1);
+        else if(isAnsModalOpen === ModalContentState.setProblemAnswer){
+            // 请求接口，将数据存入数据库
+            axios.request({
+                url:"paper/answer/add",
+                method:'POST',
+                data: {"list": answers, "paperId": paperId}
+            })
+        }
+        setisAnsModalOpen(current=> current + 1 > ModalContentState.setProblemAnswer ? ModalContentState.closed : current + 1);
     };
 
     // 取消，设置modal为关闭状态
-    const handleCancel = () => {
-        setIsModalOpen(ModalContentState.closed);
+    const handleAnsModalCancel = () => {
+        setisAnsModalOpen(ModalContentState.closed);
     };
     
-    // 根据isModalOpen的不同返回不同内容
+    // 根据isAnsModalOpen的不同返回不同内容
     const ModalContent = () => {
-        switch (isModalOpen) {
+        switch (isAnsModalOpen) {
             case ModalContentState.setBigProblemNumber: return setBigProblemNumberModalContent()
             case ModalContentState.setSmallProblemNumber: return setSmallProblemNumberModalContent()
             case ModalContentState.setProblemAnswer: return setProblemAnswerModalContent()
@@ -125,6 +183,7 @@ const AddPaperBoard: React.FC = () => {
     const setProblemAnswerModalContent = () => {
         return (
             <div>
+                
                 <p>设置每道题的答案</p>
                 <ol>
                     {range({end: bigProblemNumber}).map(i=> (
@@ -173,18 +232,101 @@ const AddPaperBoard: React.FC = () => {
         }
         return treeData;
     }
+    
+    const uploadButton = (
+        <div>
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Upload</div>
+        </div>
+    );
+
+    const handlePhotoChange = async ({ file, fileList }) => {
+        if (file.status === 'done') { 
+            // {status: 0, data: {name: 'xxx.jpg', url: '图片地址'}}
+            const result = file.response
+            console.log(result);
+            console.log(fileList);
+            if (result.msg === 'success') {
+                message.success('上传图片成功')
+                const { name, url } = result.data
+                file = fileList[fileList.length - 1]
+                file.name = name
+                file.url = url
+            } 
+            
+            else {
+                message.error('上传图片失败')
+            }
+        } 
+        setFileList(fileList)
+    }
+
+    const handlePhotoPreview = (file) => {
+        setPreviewImage(file.url||file.thumbUrl)
+        setImagePreviewOpen(true)
+    }
+
+    const handlePhotoModalCancel = () => {
+        setImagePreviewOpen(false)
+    }
+
+    // 保存试卷
+    const savePaper = () => {
+        if(paperName !== "") {
+            setIsSavePaper(true)
+            message.success("上传成功")
+        }
+        else {
+            message.error("请保存试卷名字")
+        }
+    }
+
+    const savePaperName = async() => {
+        console.log("papername", paperName)
+        if(paperName){
+            message.error("试卷名字不能为空")
+            return
+        }
+        const result = await axios.request({
+            url: 'paper/name/update',
+            method: 'GET',
+            params: {
+                paperId,
+                paperName
+            }
+        })
+        if(result.data.msg === 'success') {
+            message.success("试卷名字保存成功")
+        }
+    }
 
     return (
         <div className='teacher_add_paper_board_body'>
             <h2>请上传你的试卷</h2>
+            <Alert message="完成试卷相关信息的填写后, 记得点击上传按钮 " type="warning" />
+            <div style={{height: '15px'}}></div>
+            <Space.Compact style={{width: '100%'}}>
+                <Input addonBefore="试卷名称" value={paperName} onChange={e=>{setPaperName(e.target.value)}}/> 
+                <Button type='primary' onClick={()=>{savePaperName();}}>保存试卷名字</Button>
+            </Space.Compact>
             <div className='photo_container'>
                 <h4>上传试卷图片</h4>
-                <Upload listType="picture-card" fileList={fileList}>
-                    <div>
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                    </div>
+                <Upload 
+                    name={'upload_image'}
+                    accept="image/*" 
+                    action={'http://localhost:3000/api/upload/imageUpload'} 
+                    data = {{'paperId': paperId}}
+                    listType="picture-card" 
+                    fileList={fileList}
+                    onPreview={handlePhotoPreview}  
+                    onChange={handlePhotoChange}
+                >
+                   {fileList.length >= 100 ? null : uploadButton}
                 </Upload>
+                <Modal open={imagePreviewOpen} footer={null} onCancel={handlePhotoModalCancel}>
+                    <img alt="example" style={{ width: '100%' }} src={previewImage} />
+                </Modal>
+
             </div>
             <div className='content_container'>
                 <h4>上传题目答案</h4>
@@ -196,9 +338,12 @@ const AddPaperBoard: React.FC = () => {
                         treeData={treeData}
                     />
                 </div>
-                <Modal title="配置试卷答案" open={isModalOpen > 0} onOk={handleOk} onCancel={handleCancel} width={isModalOpen === ModalContentState.setProblemAnswer ? 1000 : 520}>
+                <Modal title="配置试卷答案" open={isAnsModalOpen > 0} onOk={handleAnsModalOk} onCancel={handleAnsModalCancel} width={isAnsModalOpen === ModalContentState.setProblemAnswer ? 1000 : 520}>
                    {ModalContent()} 
                 </Modal>
+            </div>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
+                <Button type="primary" onClick={()=>savePaper()}>确定上传试卷</Button>
             </div>
         </div>
     )

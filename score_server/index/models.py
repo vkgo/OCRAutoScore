@@ -23,10 +23,11 @@ class Teacher(User):
 class Paper(models.Model):
     teacher = models.ForeignKey(to=Teacher, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=50)
 
 
 class PaperPhoto(models.Model):
-    photo = models.ImageField(upload_to="paperPhoto")
+    photoPath = models.CharField(max_length=100)
     paper = models.ForeignKey(to=Paper, on_delete=models.CASCADE)
 
 

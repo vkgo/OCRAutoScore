@@ -9,10 +9,10 @@ const Login: React.FC = (props:any) => {
     const[isLogin, setIsLogin] = useState(true)   
     const onFinish = async () => {
         if(!isLogin) {
-            loginHttpRequest("api/register/")
+            loginHttpRequest("register/")
         }
         else {
-            let flag: boolean = await loginHttpRequest("api/login/")
+            let flag: boolean = await loginHttpRequest("login/")
             if(flag) {
                 if (form.getFieldValue("identity") === 'student') {
                     window.sessionStorage.setItem("role", "student")
