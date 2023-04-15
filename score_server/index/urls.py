@@ -19,4 +19,6 @@ urlpatterns = [
     path('teacher/papers', views.showPapersForTeacher),
     # 学生试卷列表
     path('student/papers', views.showPaperForStudent),
+    # 学生试卷图片获取
+    path('student/paper/detail', views.showPaperDetail),
 ]

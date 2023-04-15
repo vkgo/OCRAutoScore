@@ -1,10 +1,27 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import { Image, Upload } from 'antd'
 import { PlusOutlined} from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
+import { useParams } from "react-router-dom";
 import './PaperDetail.less'
+import axios from 'axios';
 const PaperDetail: React.FC = () => {
+    const paperId =  parseInt(useParams<{id: string}>()["id"])
     const [fileList, setFileList] = useState<UploadFile[]>([]);
+    const [paperImages, setImageList] = useState([])
+    const getPaperPhotos = async () => {
+        const result = await axios.request({
+            url:"student/paper/detail",
+            method: "GET",
+            params: {paperId}
+        })
+        if(result.data.msg === 'success') {
+            setImageList(result.data.paperImages)
+        }
+    }
+    useEffect(()=>{
+        if(paperImages.length ===  0) getPaperPhotos()
+    })
     return (
         <div className="student_paper_detail">
             <Image.PreviewGroup
@@ -12,27 +29,11 @@ const PaperDetail: React.FC = () => {
                     onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
                 }}
             >
-                <Image width={200} src={require("@/assets/papers/paper1.jpg")} rootClassName='paper_image'/>
-                <Image
-                    width={200}
-                    src={require("@/assets/papers/paper2.png")}
-                    rootClassName='paper_image'
-                />
-                <Image
-                    width={200}
-                    src={require("@/assets/papers/paper3.png")}
-                    rootClassName='paper_image'
-                />
-
-                <Image width={200} src={require("@/assets/papers/paper1.jpg")} rootClassName='paper_image'/>
-
-                <Image width={200} src={require("@/assets/papers/paper1.jpg")} rootClassName='paper_image'/>
-
-                <Image width={200} src={require("@/assets/papers/paper1.jpg")} rootClassName='paper_image'/>
-
-                <Image width={200} src={require("@/assets/papers/paper1.jpg")} rootClassName='paper_image'/>
-                
-                <Image width={200} src={require("@/assets/papers/paper1.jpg")} rootClassName='paper_image'/>
+                {
+                    paperImages.map(item => (
+                        <Image width={200} src={item.imgUrl} rootClassName='paper_image' key={item.id}/>
+                    ))
+                }
             </Image.PreviewGroup>
 
             <div>

@@ -1,5 +1,6 @@
 import json
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from index.models import Student, Teacher, Paper, PaperPhoto, Problem, Answer
@@ -139,3 +140,16 @@ def showPaperForStudent(request):
                                            "%Y-%m-%d %H:%M"),
                                        "id": paper.id, "teacher": paper.teacher.username}
                                       for paper in papers]})
+
+
+@require_http_methods(["GET"])
+def showPaperDetail(request):
+    root_url = request.scheme + '://' + request.get_host()
+    print("url: ", root_url)
+    paper_id = request.GET["paperId"]
+    paper = Paper.objects.get(id=paper_id)
+    photos = PaperPhoto.objects.filter(paper=paper)
+    return JsonResponse({"msg": "success", "paperImages": [
+        {"imgUrl": root_url + settings.MEDIA_URL + "paper/" + photo.photoPath.split("/")[-1], "id": photo.id}
+        for photo in photos
+    ]})
