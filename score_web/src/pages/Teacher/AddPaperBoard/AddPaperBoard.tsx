@@ -1,11 +1,10 @@
-import { Button, Upload, Tree, InputNumber, Modal, Input, message, Alert,Space } from 'antd';
-import { PlusOutlined} from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+import { Button, Tree, InputNumber, Modal, Input, message, Alert,Space } from 'antd';
 import React, { useEffect, useState } from 'react';
 import range from '@/util/range';
 import numToCN from '@/util/numToCN';
 import './AddPaperBoard.less'
 import axios from 'axios';
+import ImageUpload from '@/components/ImageUpload/ImageUpload';
 
 const {TextArea} = Input;
 /**
@@ -20,11 +19,6 @@ enum ModalContentState {
     setProblemAnswer
 }
 const AddPaperBoard: React.FC = () => {
-    // 上传图片相关
-    const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
-    const [previewImage, setPreviewImage] = useState('');
-    const [fileList, setFileList] = useState<UploadFile[]>([]);
-
     // 上传答案相关
     const [isAnsModalOpen, setisAnsModalOpen] = useState(ModalContentState.closed);
     const [bigProblemNumber, setBigProblemNumber] = useState(1);
@@ -234,43 +228,6 @@ const AddPaperBoard: React.FC = () => {
         return treeData;
     }
     
-    const uploadButton = (
-        <div>
-            <PlusOutlined />
-            <div style={{ marginTop: 8 }}>Upload</div>
-        </div>
-    );
-
-    const handlePhotoChange = async ({ file, fileList }) => {
-        if (file.status === 'done') { 
-            // {status: 0, data: {name: 'xxx.jpg', url: '图片地址'}}
-            const result = file.response
-            console.log(result);
-            console.log(fileList);
-            if (result.msg === 'success') {
-                message.success('上传图片成功')
-                const { name, url } = result.data
-                file = fileList[fileList.length - 1]
-                file.name = name
-                file.url = url
-            } 
-            
-            else {
-                message.error('上传图片失败')
-            }
-        } 
-        setFileList(fileList)
-    }
-
-    const handlePhotoPreview = (file) => {
-        setPreviewImage(file.url||file.thumbUrl)
-        setImagePreviewOpen(true)
-    }
-
-    const handlePhotoModalCancel = () => {
-        setImagePreviewOpen(false)
-    }
-
     // 保存试卷
     const savePaper = () => {
         if(paperName !== "") {
@@ -314,22 +271,7 @@ const AddPaperBoard: React.FC = () => {
             </Space.Compact>
             <div className='photo_container'>
                 <h4>上传试卷图片</h4>
-                <Upload 
-                    name={'upload_image'}
-                    accept="image/*" 
-                    action={ window.location.origin + '/api/upload/imageUpload'} 
-                    data = {{'paperId': paperId}}
-                    listType="picture-card" 
-                    fileList={fileList}
-                    onPreview={handlePhotoPreview}  
-                    onChange={handlePhotoChange}
-                >
-                   {fileList.length >= 100 ? null : uploadButton}
-                </Upload>
-                <Modal open={imagePreviewOpen} footer={null} onCancel={handlePhotoModalCancel}>
-                    <img alt="example" style={{ width: '100%' }} src={previewImage} />
-                </Modal>
-
+                <ImageUpload data={{paperId}} url={window.location.origin + '/api/upload/imageUpload'}/>
             </div>
             <div className='content_container'>
                 <h4>上传题目答案</h4>
