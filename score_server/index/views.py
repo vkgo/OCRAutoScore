@@ -100,7 +100,7 @@ def student_image_upload(request):
     student = Student.objects.get(username=username)
     StudentUploadAnswerPhoto.objects.create(photoPath=name_obj["filename"], paper=paper, student=student)
     return JsonResponse({"msg": 'success', 'data': {
-        'url': request.build_absolute_uri("/media/paper/" + name_obj["name"]), 'name': name_obj["name"]}})
+        'url': request.build_absolute_uri("/media/studentAns/" + name_obj["name"]), 'name': name_obj["name"]}})
 
 
 @require_http_methods(["POST"])

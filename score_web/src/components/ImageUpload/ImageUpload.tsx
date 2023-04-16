@@ -14,6 +14,7 @@ const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
     const [fileList, setFileList] = useState<UploadFile[]>([]);
 
     const handlePhotoPreview = (file) => {
+        console.log(file.url);
         setPreviewImage(file.url||file.thumbUrl)
         setImagePreviewOpen(true)
     }
