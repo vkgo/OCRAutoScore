@@ -1,14 +1,14 @@
 import React,{useState, useEffect} from 'react';
-import { Image, Upload } from 'antd'
-import { PlusOutlined} from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+import { Image } from 'antd'
 import { useParams } from "react-router-dom";
 import './PaperDetail.less'
 import axios from 'axios';
+import ImageUpload from '@/components/ImageUpload/ImageUpload';
 const PaperDetail: React.FC = () => {
     const paperId =  parseInt(useParams<{id: string}>()["id"])
-    const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [paperImages, setImageList] = useState([])
+    
+
     const getPaperPhotos = async () => {
         const result = await axios.request({
             url:"student/paper/detail",
@@ -19,9 +19,11 @@ const PaperDetail: React.FC = () => {
             setImageList(result.data.paperImages)
         }
     }
+
     useEffect(()=>{
         if(paperImages.length ===  0) getPaperPhotos()
     })
+    
     return (
         <div className="student_paper_detail">
             <Image.PreviewGroup
@@ -35,15 +37,9 @@ const PaperDetail: React.FC = () => {
                     ))
                 }
             </Image.PreviewGroup>
-
             <div>
                 <h3>请上传自己的答案</h3>
-                <Upload listType="picture-card" fileList={fileList}>
-                    <div>
-                        <PlusOutlined />
-                        <div style={{ marginTop: 8 }}>Upload</div>
-                    </div>
-                </Upload>
+                <ImageUpload data={{paperId, "username": window.sessionStorage.getItem("username")}} url={window.location.origin + '/api/student/answer/imageUpload'}/> 
             </div>
         </div>
         

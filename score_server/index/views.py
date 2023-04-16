@@ -1,11 +1,12 @@
 import json
+from datetime import datetime
+
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from index.models import Student, Teacher, Paper, PaperPhoto, Problem, Answer
+
+from index.models import Student, Teacher, Paper, PaperPhoto, Problem, Answer, StudentUploadAnswerPhoto
 from utils.util import tid_maker
-from datetime import datetime
 
 
 @require_http_methods(["POST"])
@@ -69,19 +70,37 @@ def removePaper(request):
     return JsonResponse({"msg": "success"})
 
 
-@require_http_methods(["POST"])
-def image_upload(request):
-    file_obj = request.FILES.get("upload_image")
-    paper_id = request.POST["paperId"]
+def image_upload(file_obj, folder):
     name = tid_maker() + '.' + file_obj.name.split(".")[1]
-    file_name = settings.MEDIA_ROOT + '/paper/' + name
+    file_name = settings.MEDIA_ROOT + '/{}/'.format(folder) + name
     with open(file_name, "wb") as f:
         for line in file_obj:
             f.write(line)
+    return {"filename": file_name, "name": name}
+
+
+@require_http_methods(["POST"])
+def paper_image_upload(request):
+    file_obj = request.FILES.get("upload_image")
+    name_obj = image_upload(file_obj, "paper")
+    paper_id = request.POST["paperId"]
     paper = Paper.objects.get(id=paper_id)
-    PaperPhoto.objects.create(photoPath=file_name, paper=paper)
-    return JsonResponse({"msg": 'success', 'data': {'url': request.build_absolute_uri("/media/paper/" + name),
-                                                    'name': name}})
+    PaperPhoto.objects.create(photoPath=name_obj["filename"], paper=paper)
+    return JsonResponse({"msg": 'success', 'data': {
+        'url': request.build_absolute_uri("/media/paper/" + name_obj["name"]), 'name': name_obj["name"]}})
+
+
+@require_http_methods(["POST"])
+def student_image_upload(request):
+    file_obj = request.FILES.get("upload_image")
+    name_obj = image_upload(file_obj, "studentAns")
+    paper_id = request.POST["paperId"]
+    username = request.POST["username"]
+    paper = Paper.objects.get(id=paper_id)
+    student = Student.objects.get(username=username)
+    StudentUploadAnswerPhoto.objects.create(photoPath=name_obj["filename"], paper=paper, student=student)
+    return JsonResponse({"msg": 'success', 'data': {
+        'url': request.build_absolute_uri("/media/paper/" + name_obj["name"]), 'name': name_obj["name"]}})
 
 
 @require_http_methods(["POST"])

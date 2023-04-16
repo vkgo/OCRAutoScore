@@ -35,6 +35,7 @@ const AddPaperBoard: React.FC = () => {
     // 重要参数
     const [paperId, setPaperId] = useState(-1)
     const [isSavePaper,setIsSavePaper] = useState(false);
+    const [isSavePaperName, setIsSavePaperName] = useState(false);
     const [paperName, setPaperName] = useState("")
 
     const init = async() =>  {
@@ -273,6 +274,7 @@ const AddPaperBoard: React.FC = () => {
     // 保存试卷
     const savePaper = () => {
         if(paperName !== "") {
+            if(!isSavePaperName) savePaperName()
             setIsSavePaper(true)
             message.success("上传成功")
         }
@@ -283,7 +285,7 @@ const AddPaperBoard: React.FC = () => {
 
     const savePaperName = async() => {
         console.log("papername", paperName)
-        if(paperName){
+        if(paperName === ""){
             message.error("试卷名字不能为空")
             return
         }
@@ -297,6 +299,7 @@ const AddPaperBoard: React.FC = () => {
         })
         if(result.data.msg === 'success') {
             message.success("试卷名字保存成功")
+            setIsSavePaperName(true)
         }
     }
 
@@ -314,7 +317,7 @@ const AddPaperBoard: React.FC = () => {
                 <Upload 
                     name={'upload_image'}
                     accept="image/*" 
-                    action={'http://localhost:3000/api/upload/imageUpload'} 
+                    action={ window.location.origin + '/api/upload/imageUpload'} 
                     data = {{'paperId': paperId}}
                     listType="picture-card" 
                     fileList={fileList}

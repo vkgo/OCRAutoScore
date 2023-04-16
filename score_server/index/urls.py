@@ -6,7 +6,9 @@ urlpatterns = [
     path('login/', views.login),
     path('register/', views.register),
     # 照片上传
-    path('upload/imageUpload', views.image_upload),
+    path('upload/imageUpload', views.paper_image_upload),
+    # 学生答案照片上传
+    path('student/answer/imageUpload', views.student_image_upload),
     # 创建试卷
     path('paper/add', views.addPaper),
     # 删除试卷

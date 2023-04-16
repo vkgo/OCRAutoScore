@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import './DashBoard.less'
 import { Breadcrumb, Button, Dropdown, MenuProps, Space } from "antd"
 import { DownOutlined} from '@ant-design/icons';
+import BreadcrumbItemInterface from "@/ts/interface/BreadcrumbItemInterface";
 interface DashBoardProps extends RouteConfigComponentProps {}
 const breadcrumbNameMap: Record<string, string> = {
     '/teacher': '首页',
@@ -11,10 +12,7 @@ const breadcrumbNameMap: Record<string, string> = {
     '/teacher/list/add': '添加试卷',
     '/teacher/list/detail': '查看试卷详情',
 };
-interface BreadcrumbItemInterface {
-    title: string | JSX.Element,
-    key?: string
-}
+
 const DashBoard: React.FC<DashBoardProps> = (props) => {
     console.log('props:', props)
     // 拆分当前路径
