@@ -1,0 +1,8 @@
+# deploy config
+port: 8891
+infer_weights: ./runs/detect/train3/weights/best.pt
+
+# training config
+dataset: /data02/hzy/Data/dataset/3k_card_image_yolo/dataset.yaml
+model: ./model/yolov8m.yaml
+training_weights: ./runs/detect/train3/weights/best.pt
