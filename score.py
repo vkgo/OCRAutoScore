@@ -21,10 +21,10 @@ class scoresystem:
         # answer是一个数组，每项是一个字典，字典格式如下：
         # {'section': 'xzt', # section的意思是题目类型，xzt是选择题，tkt是填空题，zwt是作文题
         # 'value': [...]} # value里面的值是各小题的正确答案
-        self.answer = [{'section': 'tkt', 'value': ['60', '0.66', '600', 'ln4+3/2']}]
+        # self.answer = [{'section': 'tkt', 'value': ['60', '0.66', '600', 'ln4+3/2']}]
 
     def set_answer(self, answer):
-        pass
+       self.answer = answer
 
 
     def get_score(self, img: PIL.Image.Image):
@@ -72,12 +72,12 @@ class scoresystem:
 
 
 
-if __name__ == '__main__':
-    test_dir = './example_img'
-    lst = os.listdir(test_dir)
-    s = scoresystem()
-    for i in lst:
-        if i.endswith('.png') or i.endswith('.jpg'):
-            path = os.path.join(test_dir, i)
-            img = PIL.Image.open(path)
-            s.get_score(img)
+# if __name__ == '__main__':
+#     test_dir = './example_img'
+#     lst = os.listdir(test_dir)
+#     s = scoresystem()
+#     for i in lst:
+#         if i.endswith('.png') or i.endswith('.jpg'):
+#             path = os.path.join(test_dir, i)
+#             img = PIL.Image.open(path)
+#             s.get_score(img)
