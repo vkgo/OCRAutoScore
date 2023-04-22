@@ -141,7 +141,7 @@ YOLOv8作为一种实时目标检测算法，可能被应用于多种场景，�
 
 ## 4.2 单独执行大题分割
 
-大题分割源码在`segmentation/Layout4Card`，也可以通过URLhttps://github.com/vkgo/OCRAutoScore/blob/3a97c0bd2b32abdeaba7c7c0bfa5106bdaee4479/segmentation/Layout4Card进入我们仓库中大题分割的目录查看、复制、运行，需要更多的支持，可以查看文档https://github.com/vkgo/OCRAutoScore/blob/aeefed4426e3088507e709cfd3cb99c891f44af2/segmentation/Layout4Card/README.md。
+大题分割源码在`segmentation/Layout4Card`，也可以通过[URL](https://github.com/vkgo/OCRAutoScore/blob/3a97c0bd2b32abdeaba7c7c0bfa5106bdaee4479/segmentation/Layout4Card)进入我们仓库中大题分割的目录查看、复制、运行，需要更多的支持，[可以查看文档](https://github.com/vkgo/OCRAutoScore/blob/aeefed4426e3088507e709cfd3cb99c891f44af2/segmentation/Layout4Card/README.md)。
 
 `infer.py`是一个推理代码的示范，在这之中：
 
@@ -212,7 +212,9 @@ python .\infer.py
 
 ![CAN模型框架](README.assets/CAN.png)
 在本项目中，结合了Li B(2022)提出的CAN（计数感知网络），我们实现了对log、e^x等较为复杂的公式的识别。CAN整合了两部分任务：手写公式识别和符号计数。具体来说，使用了一个弱监督的符号计数模块，它可以在没有符号位置的情况下预测每个符号类的数目。
-# 8.2 实现
+
+## 8.2 实现
+
 训练部分
     在数学公式识别中，我们参考了CAN(Li B et al)使用的方法，使用注意力机制，结合encoder，decoder的方法，使用DenseNet作为encoder。在训练过程中，我们先将images输入DenseNet得到image的特征，之后，我们将该特征分别输入到预先设置的三个decoder中，前两个decoder生成counting_loss,最后一个decoder生成word_loss，通过三个loss分别训练不同的decoder。
 数据集
@@ -220,15 +222,19 @@ python .\infer.py
 预测
 	在预测公式的过程中，预先定义一个字典，使用encoder-decoder将预测的概率与字典中的字符匹配，实现手写公式的识别，如下图所示，我们将预先定义的字符映射到字典中。
 ![按照字典预测](README.assets/inference.jpg)
-# 8.3 运行
+
+## 8.3 运行
+
 该项目需要pytorch1.10.2+python3.6
 training：
 
+```shell
 cd scoreblocks/CAN
 
 source activate pytorch
 
 python train --dataset=CROHME
+```
 
 test:
 
