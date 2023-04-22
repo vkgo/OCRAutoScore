@@ -1,4 +1,6 @@
 import functools
+import sys
+
 import cv2
 import os
 import numpy as np
@@ -154,10 +156,19 @@ class Model:
 
 
 if __name__ == '__main__':
-    path = 'img'  # 文件夹名
+    path = input('输入识别的文件夹路径\n')
+    debug = input('是否为Debug模式：T/F\n')
+    if debug == 'T':
+        debug = True
+    elif debug == 'F':
+        debug = False
+    else:
+        print('输入错误')
+        sys.exit()
+    # path = 'img'  # 文件夹名
     folder = os.listdir(path)
     count = 0
-    model = Model(debug=True)
+    model = Model(debug=debug)
     # model = Model()
     for i in folder:
         pic_path = os.path.join(path, i)

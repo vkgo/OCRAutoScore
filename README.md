@@ -94,6 +94,15 @@ if __name__ == "__main__":
 ```shell
 OCRAutoScore
 +----scoreblocks # 填空题、选择题、作文的批改模型文件夹
+|    score_web # 前端网页文件夹
+|    | components # 前端组件
+|    | pages # 页面
+|    | routes # 路由
+|    score_server # 后端文件夹
+|    |  index
+|       |   +----models.py # 数据库模型
+|       |   +----urls.py # 接口文件
+|       |   +----views.py # 视图处理函数
 |    CharacterRecognition
 |    |    +----SpinalVGG.pth # SpinalVGG模型
 |    |    +----WaveMix.pth # WaveMix模型
@@ -450,4 +459,49 @@ python inference.py
 
 
 # 10 WebUI
+## 8.1 框架
+- 前端框架： React + Typescript
+    ![React-TS](README.assets/React-TS.png)
+- 后端框架: Django —— 基于python开发的后端框架
+    ![Django](README.assets/Django.png)
+
+## 8.2 实现
+#### 登录注册
+![Login](README.assets/Login.png)
+- 前端使用antd组件库Form组件，用户填写表单后，请求后端接口。
+- 后端查询Student、Teacher数据表 是否存在对应的数据，如果查询为空, 那么返回错误“用户名或者密码错误”，如果不为空，则返回登录成功的信息
+- 如果登录成功，我们将用户信息存入session中
+
+![Register](README.assets/Register.png)
+- 前端使用antd组件库Form组件，用户填写表单后，请求后端接口。
+- 后端根据username查询Student、Teacher数据表 是否存在对应的数据，如果查询为空, 那么返回“注册成功”，如果不为空，则返回错误“该用户名已经被注册”的信息
+- 如果登录成功，我们将用户信息存入session中
+
+#### 试卷列表
+试卷列表在学生、教师页面都有出现。在学生界面则是题库，在教师界面则是教师上传过的所有试卷。
+![paperList](README.assets/paperList.png)
+
+前端请求后端接口，后端查询Paper数据表返回相应信息
+
+#### 教师上传试卷
+![addPaper](README.assets/addPaper.png)
+- 刚进入页面时，前端请求创建试卷的接口; 
+- 这部分有三个信息： 试卷名字、试卷图片、试卷答案。填入信息后，请求后端相应的接口保存对应的信息。
+- 如果用户没有点击保存按钮，那么退出页面后，前端会请求删除试卷的接口
+#### 学生上传作答图片
+![studentUploadAnswer](README.assets/studentUploadAnswer.png)
+- 刚进入页面时候，前端根据试卷的paperid请求后端，后端返回试卷的图片。
+- 学生上传自己作答的图片
+- 后端调用*score.py*的模型进行评分，并且返回评分
+## 8.3 运行
+- 前端运行
+    进入score_web文件夹
+    ```shell
+    npm start
+    ```
+- 后端运行
+    进入score_server文件夹
+    ```shell
+    python manage.py runserver
+    ```
 
