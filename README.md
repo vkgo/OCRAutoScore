@@ -6,8 +6,6 @@
 
 ![系统流程图](README.assets/系统流程图.jpg)
 
-除了小题分割、大题分割需要等待数据集，现在已经可以开始做其他模块了。
-
 ## 2 模块开发规范
 
 示例，如`scoreblocks/fillblankmodel.py`文件一样，写一个类，实际操作中，我们实例化这个类，然后在这个类的`init`中加载各使用到的模型（后面就不用每次调用都要加载了），然后使用类中各个成员函数来实现功能。而py文件中的`if __name__ == "__main__":`可以用来测试用。类、函数的注释中英文都行。
@@ -94,15 +92,6 @@ if __name__ == "__main__":
 ```shell
 OCRAutoScore
 +----scoreblocks # 填空题、选择题、作文的批改模型文件夹
-|    score_web # 前端网页文件夹
-|    | components # 前端组件
-|    | pages # 页面
-|    | routes # 路由
-|    score_server # 后端文件夹
-|    |  index
-|       |   +----models.py # 数据库模型
-|       |   +----urls.py # 接口文件
-|       |   +----views.py # 视图处理函数
 |    CharacterRecognition
 |    |    +----SpinalVGG.pth # SpinalVGG模型
 |    |    +----WaveMix.pth # WaveMix模型
@@ -112,6 +101,16 @@ OCRAutoScore
 |    +----essayscoremodel.py # 作文评分模型
 |    +----fillblankmodel.py # 填空题批改模型
 |    +----singleCharacterRecognition.py # 单字母识别模型
++----score_web # 前端网页文件夹
+|    | components # 前端组件
+|    | pages # 页面
+|    | routes # 路由
++----score_server # 后端文件夹
+|    |  index
+|    +----models.py # 数据库模型
+|    +----urls.py # 接口文件
+|    +----views.py # 视图处理函数
++----CAN # 共识识别 CAN模型的部分依赖
 +----README.assets # README的图片文件夹
 +----README.md # 仓库说明文件
 +----.gitignore # git忽略的文件夹、文件
@@ -454,7 +453,21 @@ python inference.py
 
 # 9 作文评分模型
 
+此处参考NAACL的论文[On the Use of Bert for Automated Essay Scoring: Joint Learning of Multi-Scale Essay Representation - ACL Anthology](https://aclanthology.org/2022.naacl-main.249/)
 
+## 9.1 原模型结构
+
+![image-20230422120407204](README.assets/image-20230422120407204.png)
+
+采用了多尺度Bert、多重损失、迁移学习等方法。原模型的仓库为：[lingochamp/Multi-Scale-BERT-AES: Demo for the paper "On the Use of BERT for Automated Essay Scoring: Joint Learning of Multi-Scale Essay Representation" (github.com)](https://github.com/lingochamp/Multi-Scale-BERT-AES)
+
+## 9.2 模型改进
+
+由于原模型为完全开源，许多部分是我们自己完成的，或许是我们的水平有限，在ASAP数据集上并没有作者所说的效果那么好。
+
+经过消融实验之后，我们使用单一的debertav3-large模型代替多尺度 bert-base模型，使用`(0.2+0.8*cos(epoch/total_epoch*pi))MSE + (1-0.8*cos(epoch/total_epoch*pi)))*(RankLoss + CosLoss) `来代替原来的损失函数，由于数据集限制，我们没有使用迁移学习，其他部分也有改动，但不大。
+
+改进后的模型，我们取名为MSPLM，可以前往我们的仓库：[vkgo/MSPLM (github.com)](https://github.com/vkgo/MSPLM)，获取代码、实验结果。
 
 
 
