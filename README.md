@@ -459,13 +459,15 @@ python inference.py
 
 
 # 10 WebUI
-## 8.1 框架
+## 10.1 框架
+
 - 前端框架： React + Typescript
     ![React-TS](README.assets/React-TS.png)
 - 后端框架: Django —— 基于python开发的后端框架
     ![Django](README.assets/Django.png)
 
-## 8.2 实现
+## 10.2 实现
+
 #### 登录注册
 ![Login](README.assets/Login.png)
 - 前端使用antd组件库Form组件，用户填写表单后，请求后端接口。
@@ -493,7 +495,7 @@ python inference.py
 - 刚进入页面时候，前端根据试卷的paperid请求后端，后端返回试卷的图片。
 - 学生上传自己作答的图片
 - 后端调用*score.py*的模型进行评分，并且返回评分
-## 8.3 运行
+## 10.3 运行
 - 前端运行
     进入score_web文件夹
     ```shell
