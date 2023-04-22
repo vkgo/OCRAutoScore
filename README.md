@@ -2,7 +2,7 @@
 
 此仓库为大创集成仓库的README介绍资料。仓库用于将各模块按照流程图一个个完成，并留下输入输出相关接口、文档。README用于说明此项目的原理、实现方式、复现方法等。
 
-GitHub仓库地址：[vkgo/OCRAutoScore (github.com)](https://github.com/vkgo/OCRAutoScore)
+GitHub仓库地址：[https://github.com/vkgo/OCRAutoScore](https://github.com/vkgo/OCRAutoScore)
 
 ## 1 总流程图
 
