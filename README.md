@@ -133,10 +133,30 @@ OCRAutoScore
 
 
 # 8 填空题模型-公式识别
+# 8.1 框架
+![CAN模型框架](README.assets/CAN.png)
+在本项目中，结合了Li B(2022)提出的CAN（计数感知网络），我们实现了对log、e^x等较为复杂的公式的识别。CAN整合了两部分任务：手写公式识别和符号计数。具体来说，使用了一个弱监督的符号计数模块，它可以在没有符号位置的情况下预测每个符号类的数目。
+# 8.2 实现
+训练部分
+    在数学公式识别中，我们参考了CAN(Li B et al)使用的方法，使用注意力机制，结合encoder，decoder的方法，使用DenseNet作为encoder。在训练过程中，我们先将images输入DenseNet得到image的特征，之后，我们将该特征分别输入到预先设置的三个decoder中，前两个decoder生成counting_loss,最后一个decoder生成word_loss，通过三个loss分别训练不同的decoder。
+数据集
+	我们使用CROHME数据集进行公式的训练。CROHME数据集为pkl文件，我们通过python的PIL库读取该数据集。
+预测
+	在预测公式的过程中，预先定义一个字典，使用encoder-decoder将预测的概率与字典中的字符匹配，实现手写公式的识别，如下图所示，我们将预先定义的字符映射到字典中。
+![按照字典预测](README.assets/inference.jpg)
+# 8.3 运行
+该项目需要pytorch1.10.2+python3.6
+training：
 
+cd scoreblocks/CAN
 
+source activate pytorch
 
+python train --dataset=CROHME
 
+test:
+
+python inference.py
 
 # 9 作文评分模型
 
