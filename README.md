@@ -199,13 +199,110 @@ python .\infer.py
 
 # 5 作答区域分割-小题分割
 
+## 5.1 工具
+
+`opencv-python 4.5.5.62`
+
+## 5.2 具体实现
+
+### (1) 图片预处理
+
+将输入的填空题图片处理成二值图片
+
+![Debug](README.assets/binary.png)
+
+### (2) 保留水平线
+
+对二值图片进行腐蚀处理，保留图片中的水平线，其余不相关的笔迹
+![Debug](README.assets/opencv1.png)
+
+### (3) 消除干扰的水平线
+
+对所有水平线的位置进行排序，排序法则为垂直方向降序，水平方向升序。根据上图排序结果如下：
+![.1](README.assets/opencv2.png)
+
+遍历所有定位，获取当前的水平线（在此水平线被视为宽度小于长度的矩形，每条边的存储形式为[x,y,w,h]）的位置(x, y)，并标记当前的y坐标，给定hmin与hmax，设置高度范围限制(y - hmax,y - hmin)，记录处于该范围的定位，若遇见范围外的，更新y坐标和高度限制。
+遍历结束后将标记的目标移除，剩下的即为检测目标。
+
+最后再进行升序排序，进行遍历。得到检测的效果如下所示：
+![.2](README.assets/opencv3.png)
+
+
+## 5.3 使用说明
+
+```commandline
+cd segmentation/blankSegmentation
+python blank_segmentation.py
+```
+
+根据提示输入识别的文件夹路径，确定Debug模式
+
+在Debug模式下会在debug文件夹中输出扫描结果，如样例所示：
+![原图](README.assets/1972.jpg)
+![Debug](README.assets/1972d.png)
 
 
 
 
 # 6 选择题模型
 
+## 6.1 数据集
 
+使用EMNIST数据集的letters部分，该部分只包含手写字母数据，适合作为选择题单字母模型数据集。
+
+## 6.2 模型框架
+
+### 6.2.1 SpinalNet模型
+
+![SpinalNet](README.assets/SpinalNet.png)
+
+模型参考地址：`https://github.com/dipuk0506/SpinalNet`
+
+该神经网络模拟的是人体的躯体感觉系统。该神经网络的特点主要有：神经丛结构（体现在中间层），全局影响与局部输出等。
+
+神经网络模型流向：输入层->中间层->输出层
+
+中间子层接收输入的方向有输入层和前一个中间子层的输入。
+
+### 6.2.2 WaveMix模型
+
+![WaveMix](README.assets/WaveMix.png)
+
+模型参考地址：`https://github.com/pranavphoenix/WaveMix`
+
+WaveMix模型主要利用2D离散小波变换(DWT)对空间特征进行混合，无需展开图像与自我注意力机制，利用自身图像的2D结构来提高泛化能力。
+
+
+## 6.3 模型实现
+
+### 6.3.1 SpinalNet模型
+
+输入层先将输入的数据传入卷积层提取特征，提取的特征分成几个部分，传入不同的中间层，最后将特征合并，经过线性层输入分类结果。
+
+### 6.3.2 WaveMix模型
+
+图像首先经过卷积层，再进入一系列WaveMix块（WaveMix块里主要做离散小波变换，再按序传到具有GELU的MLP层、转置卷积层与BatchNorm层），之后进入MLP Head，再通过全局平均池化层得到分类输出层。
+
+## 6.4 模型训练
+
+模型训练地址：`https://github.com/YouHui1/Character_Recognition`
+
+```commandline
+python train.py -k number
+```
+
+`number == 1` 时选择`SpinalNet`模型，
+`number == 2` 时选择`WaveMix`模型
+
+训练前可在`config.py`里修改模型类型，训练轮数，学习率，batchsize等等。
+
+训练完毕后，训练日志存储在`log`文件夹中，模型参数存储在`param`文件夹中
+
+## 6.4 模型使用说明
+
+将训练后的模型参数保存在某一路径中（本项目保存在`CharacterRecognition`文件夹中）
+
+运行`singleCharacterRecognition.py`文件，根据提示输入识别单字母图片的文件夹路径，输出为字母识别结果
 
 
 
