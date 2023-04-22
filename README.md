@@ -134,7 +134,7 @@ OCRAutoScore
 
 # 8 填空题模型-公式识别
 # 8.1 框架
-![公式识别CAN框架](README.assets/CAN.png）
+![CAN模型框架](README.assets/CAN.png)
 
 
 
