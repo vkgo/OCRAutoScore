@@ -36,7 +36,21 @@ class model:
         print(pre)
         return pre
 
+    def output_img(self, img):
+        image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        image = np.asarray(image)
+
+        # print(np.shape(image))
+        # 对数组进行维度处理（根据具体的神经网络测试需求进行维度调整）
+        # processed_img_array = np.expand_dims(image, axis=0)
+        image = torch.Tensor(255 - image) / 255
+        image = image.unsqueeze(0).unsqueeze(0)
+        pre, _, mae, mse = self.model(image, None, None)
+        pre = self.words.decode(pre)
+        # print(pre)
+        return pre
+
 if __name__ == '__main__':
     model=model()
-    image_path='./CAN/samples/test_15.jpg'
+    image_path='./scoreblocks/CAN/samples/test_15.jpg'
     model.output(img_path=image_path)

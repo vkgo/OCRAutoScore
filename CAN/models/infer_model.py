@@ -43,9 +43,12 @@ class Inference(nn.Module):
         counting_preds2, counting_maps2 = self.counting_decoder2(cnn_features, None)
         counting_preds = (counting_preds1 + counting_preds2) / 2
         counting_maps = (counting_maps1 + counting_maps2) / 2
-   
-        mae = self.cal_mae(counting_preds, gen_counting_label(labels, self.out_channel, True)).item()
-        mse = math.sqrt(self.cal_mse(counting_preds, gen_counting_label(labels, self.out_channel, True)).item())
+
+        if labels == None:
+            mae, mse = None, None
+        else:
+            mae = self.cal_mae(counting_preds, gen_counting_label(labels, self.out_channel, True)).item()
+            mse = math.sqrt(self.cal_mse(counting_preds, gen_counting_label(labels, self.out_channel, True)).item())
 
         word_probs, word_alphas = self.decoder(cnn_features, counting_preds, is_train=is_train)
 
