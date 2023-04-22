@@ -11,7 +11,7 @@ CLS_ID_NAME_MAP = {
 }
 
 model = YOLO(model='./runs/detect/train3/weights/best.pt')
-folder = '/data02/data/answersheet/1664328181460/6333b2373a83aa4f9a04f640'
+folder = './testdata'
 file_names = os.listdir(folder)
 
 random.shuffle(file_names)

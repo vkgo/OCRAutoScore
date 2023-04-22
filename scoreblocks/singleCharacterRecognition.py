@@ -23,7 +23,6 @@ class Model:
             self.model = SpinalVGG(27)
         self.model.load_state_dict(torch.load(path))
         # self.model.cpu()
-        self.model.eval()
         self.transforms = transforms.Compose([torchvision.transforms.ToTensor(),
                                               torchvision.transforms.Normalize(
                                                   (0.1307,), (0.3081,))])
@@ -50,7 +49,7 @@ class Model:
         # 格式转换
         inp = self.transforms(binary)
         inp = torch.unsqueeze(inp, 0)
-        inp = inp
+        inp = inp.cuda()
         # 检测
         self.model.eval()
         with torch.no_grad():
@@ -62,7 +61,7 @@ if __name__ == '__main__':
     selection = {'SpinalVGG': './CharacterRecognition/SpinalVGG_dict.pth',
                  'WaveMix': './CharacterRecognition/WaveMix_dict.pth'}
 
-    m = Model(selection['SpinalVGG'], 'SpinalVGG')
+    m = Model(selection['WaveMix'], 'WaveMix')
     img_path = input("输入识别单字母图片的文件夹路径")
     # img_path = './CharacetrRecognition/example'
     acc = 0
@@ -75,5 +74,6 @@ if __name__ == '__main__':
             out = m.output(path)
             # 输出分类结果
             res = chr(out.argmax(1) + 64)
-            acc += res == i[0]
-            print("res: {} real: {} {} {}".format(res, i[0], res == i[0], acc / sum_))
+            print(res)
+            # acc += res == i[0]
+            # print("res: {} real: {} {} {}".format(res, i[0], res == i[0], acc / sum_))
