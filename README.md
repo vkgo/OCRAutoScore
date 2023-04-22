@@ -147,10 +147,15 @@ OCRAutoScore
 # 8.3 运行
 该项目需要pytorch1.10.2+python3.6
 training：
+
 cd scoreblocks/CAN
+
 source activate pytorch
+
 python train --dataset=CROHME
+
 test:
+
 python inference.py
 
 # 9 作文评分模型
