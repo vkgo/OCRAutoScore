@@ -141,7 +141,7 @@ YOLOv8作为一种实时目标检测算法，可能被应用于多种场景，�
 
 ## 4.2 单独执行大题分割
 
-大题分割源码在`segmentation/Layout4Card`，也可以通过URLhttps://github.com/vkgo/OCRAutoScore/blob/3a97c0bd2b32abdeaba7c7c0bfa5106bdaee4479/segmentation/Layout4Card进入我们仓库中大题分割的目录查看、复制、运行。
+大题分割源码在`segmentation/Layout4Card`，也可以通过URLhttps://github.com/vkgo/OCRAutoScore/blob/3a97c0bd2b32abdeaba7c7c0bfa5106bdaee4479/segmentation/Layout4Card进入我们仓库中大题分割的目录查看、复制、运行，需要更多的支持，可以查看文档https://github.com/vkgo/OCRAutoScore/blob/aeefed4426e3088507e709cfd3cb99c891f44af2/segmentation/Layout4Card/README.md。
 
 `infer.py`是一个推理代码的示范，在这之中：
 
