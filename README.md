@@ -143,7 +143,7 @@ OCRAutoScore
 	我们使用CROHME数据集进行公式的训练。CROHME数据集为pkl文件，我们通过python的PIL库读取该数据集。
 预测
 	在预测公式的过程中，预先定义一个字典，使用encoder-decoder将预测的概率与字典中的字符匹配，实现手写公式的识别，如下图所示，我们将预先定义的字符映射到字典中。
-![按照字典预测](README.assets/inference.png)
+![按照字典预测](README.assets/inference.jpg)
 # 8.3 运行
 该项目需要pytorch1.10.2+python3.6
 training：
