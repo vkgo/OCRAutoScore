@@ -203,12 +203,212 @@ python .\infer.py
 
 # 7 填空题模型-中英文识别
 
+中英文识别部分，我们使用PaddlePaddleOCR+Clip来实现识别+评判的中英文填空题批改。
 
+## 7.1 PaddlePaddleOCR
+
+PaddlePaddleOCR是一个基于PaddlePaddle深度学习框架的免费、开源的OCR（Optical Character Recognition，光学字符识别）项目。它由百度开源并持续维护。PaddlePaddleOCR旨在提供一个易于使用、高性能、多语言支持的OCR解决方案。
+
+该项目结合了最新的深度学习技术和实际应用需求，致力于为开发者提供一个简单易用、功能强大的OCR工具库。其支持的场景包括但不限于印刷体、手写体、场景文本的识别等。
+
+### 7.1.1 选择PPOCR的原因
+
+PaddlePaddleOCR在许多OCR竞赛中取得了优异的成绩，表现出了良好的泛化能力和性能。它被广泛应用于包括智能办公、金融、医疗、教育等多个领域。
+
+PaddlePaddleOCR具有以下主要功能与特性：
+
+1. 多任务支持：PaddlePaddleOCR支持多种OCR任务，包括文本检测、方向分类、文本识别等，可灵活应对各种场景。
+2. 多语言支持：项目支持多种语言的识别，包括英文、中文、法文、德文、日文等，适用于国际化场景。
+3. 易于使用：PaddlePaddleOCR提供了丰富的API接口和预训练模型，开发者可以快速上手并实现自定义需求。
+4. 高性能：项目结合了最新的深度学习技术，包括卷积神经网络（CNN）和长短时记忆网络（LSTM），确保了较高的识别准确率和性能。
+5. 实时性：PaddlePaddleOCR在保证识别准确率的同时，关注实时性，可以满足实时场景下的OCR需求。
+
+通过这些功能与特性，PaddlePaddleOCR为开发者提供了一个高效、易用、可扩展的OCR解决方案，是我们调研之后，**对中文手写字体识别最好的一个开源项目**。
+
+### 7.1.2 PPOCR的基本结构
+
+PaddlePaddleOCR的项目架构主要包括以下几个部分：
+
+1. 文本检测：文本检测模块负责在图像中定位文本区域。PaddlePaddleOCR提供了多种检测算法，如DB（Differentiable Binarization）、EAST（Efficient and Accurate Scene Text Detector）等，以满足不同场景下的检测需求。
+2. 方向分类：方向分类模块用于判断检测到的文本区域的方向，主要针对旋转文本进行处理。这有助于将文本区域校正到统一方向，为后续的文本识别做好准备。
+3. 文本识别：文本识别模块负责从校正后的文本区域中提取文本信息。PaddlePaddleOCR采用了CRNN（Convolutional Recurrent Neural Network）等先进算法进行文本识别，以实现高准确率的字符识别。
+4. 模型训练与优化：PaddlePaddleOCR提供了丰富的预训练模型和训练脚本，支持用户根据自己的数据集进行模型训练。此外，项目还提供了模型优化工具，帮助用户在保持准确率的同时，降低模型复杂度，提高推理速度。
+5. 推理部署：PaddlePaddleOCR支持多种部署方式，包括Python API、C++ API和服务端部署。项目提供了易用的部署工具和教程，使得OCR功能能够方便地集成到各种应用中。
+6. 工具与API：PaddlePaddleOCR提供了多种工具和API，帮助用户快速上手项目并实现自定义功能。例如，项目提供了可视化工具，方便用户对检测与识别结果进行分析。
+
+这个架构确保了PaddlePaddleOCR可以适应不同场景的文本识别需求，同时易于开发者使用和定制。
+
+![img](README.assets/v2-1bfd617dd0657f17981db27957641bd1_r.jpg)
+
+### 7.1.3 预训练模型
+
+PaddlePaddleOCR提供了多种预训练模型，以便用户可以根据自己的需求选择合适的模型。这些预训练模型涵盖了不同的文本检测和识别算法，包括以下几种：
+
+1. 文本检测预训练模型：PaddlePaddleOCR为不同的文本检测算法提供了预训练模型。例如，DB（Differentiable Binarization）和EAST（Efficient and Accurate Scene Text Detector）等。
+2. 方向分类预训练模型：项目提供了方向分类预训练模型，用于判断检测到的文本区域的方向。
+3. 文本识别预训练模型：PaddlePaddleOCR为文本识别任务提供了多种预训练模型，如CRNN（Convolutional Recurrent Neural Network）等。这些模型支持多种语言，如英文、中文、日文等。
+
+这些预训练模型为开发者提供了一个很好的起点，用户可以基于这些模型进行微调（Fine-tuning），以便适应自己的任务和数据集。在实际应用中，选择合适的预训练模型可以大大减少模型训练时间，并提高模型性能。
+
+预训练模型可以到百度[PaddlePaddle的仓库](https://github.com/PaddlePaddle/PaddleOCR)中进行下载，下面转自PaddlePaddle仓库，我们使用的是`English ultra-lightweight PP-OCRv3 model`、`Chinese and English ultra-lightweight PP-OCRv3 model（16.2M）`这两个轻量化模型。
+
+| Model introduction                                           | Model name              | Recommended scene | Detection model                                              | Direction classifier                                         | Recognition model                                            |
+| ------------------------------------------------------------ | ----------------------- | ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Chinese and English ultra-lightweight PP-OCRv3 model（16.2M） | ch_PP-OCRv3_xx          | Mobile & Server   | [inference model](https://paddleocr.bj.bcebos.com/PP-OCRv3/chinese/ch_PP-OCRv3_det_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/PP-OCRv3/chinese/ch_PP-OCRv3_det_distill_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/PP-OCRv3/chinese/ch_PP-OCRv3_rec_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/PP-OCRv3/chinese/ch_PP-OCRv3_rec_train.tar) |
+| English ultra-lightweight PP-OCRv3 model（13.4M）            | en_PP-OCRv3_xx          | Mobile & Server   | [inference model](https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_det_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_det_distill_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_rec_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_rec_train.tar) |
+| Chinese and English ultra-lightweight PP-OCRv2 model（11.6M） | ch_PP-OCRv2_xx          | Mobile & Server   | [inference model](https://paddleocr.bj.bcebos.com/PP-OCRv2/chinese/ch_PP-OCRv2_det_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/PP-OCRv2/chinese/ch_PP-OCRv2_det_distill_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/PP-OCRv2/chinese/ch_PP-OCRv2_rec_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/PP-OCRv2/chinese/ch_PP-OCRv2_rec_train.tar) |
+| Chinese and English ultra-lightweight PP-OCR model (9.4M)    | ch_ppocr_mobile_v2.0_xx | Mobile & server   | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_det_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_det_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_rec_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_rec_train.tar) |
+| Chinese and English general PP-OCR model (143.4M)            | ch_ppocr_server_v2.0_xx | Server            | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_server_v2.0_det_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_server_v2.0_det_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_train.tar) | [inference model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_server_v2.0_rec_infer.tar) / [trained model](https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_server_v2.0_rec_train.tar) |
+
+
+
+## 7.2 Clip
+
+Clip是由OpenAI开发的一种具有高级视觉和语言理解能力的人工智能模型。该项目旨在创建一个能够理解图像内容并将其与自然语言描述相结合的AI系统。Clip实现了计算机视觉与自然语言处理的融合，为多种任务提供了强大的性能。
+
+Clip的名字来源于“Contrastive Language-Image Pretraining”，表明这个模型是通过在大量文本和图像数据上进行预训练，学习将语言和图像信息联系起来的方法。这使得Clip具有诸如图像分类、生成文本描述以及从文本描述生成图像等功能。Clip的核心目标是通过将视觉和语言的理解结合在一起，实现更智能、更灵活的AI应用。
+
+### 7.2.1 选择Clip的原因
+
+Clip模型的基础是基于Transformer架构，将计算机视觉（CV）与自然语言处理（NLP）技术相结合。它通过使用大量的图像-文本对进行预训练，学会了如何将图像和自然语言联系在一起。
+
+在训练过程中，Clip使用了一种名为对比学习（contrastive learning）的方法。对比学习的关键在于让模型学会区分和关联正确的图像-文本对，同时抑制不相关的组合。具体来说，模型需要将正例（匹配的图像-文本对）与负例（不匹配的图像-文本对）进行区分，并通过优化过程来提高正例的相似度，同时降低负例的相似度。
+
+训练完成后，Clip可以执行多种任务，如图像分类、文本到图像生成等。在执行这些任务时，Clip会计算给定的图像与自然语言描述之间的相似度。例如，在进行图像分类任务时，Clip会计算输入图像与每个类别的文本描述之间的相似度，并选择与输入图像最相似的类别作为预测结果。
+
+Clip不仅可以处理预先定义好的分类任务，还可以在不进行额外训练的情况下，灵活处理用户提供的自然语言查询。这使得Clip在计算机视觉和自然语言处理领域具有很强的通用性和可扩展性。
+
+**而我们的填空题识别，如果但用CV的方式，可能会导致识别的准确率过低，而因为我们本身是可以知道填空题答案的，此时，结合填空题答案的语意和学生作答手写体图片的语意，可以达到二次检查，将准确率大大提升（经过我们少数样本的测试，准确率已知的是100%）。**
+
+### 7.2.2 Clip的基本结构
+
+Clip模型的基本结构由两个主要部分组成：一个是视觉编码器（Visual Encoder），另一个是文本编码器（Text Encoder）。这两个编码器都基于Transformer架构，使得模型能够同时处理图像和自然语言数据。
+
+1. 视觉编码器：视觉编码器的任务是将输入图像转换成具有高层次特征表示的向量。这通常通过使用类似于ViT（Vision Transformer）的模型来完成。ViT模型将输入图像分割成多个小块，然后将每个小块展平并线性嵌入为一个向量。这些向量被送入Transformer层进行编码，最终输出一个表示整个图像的向量。
+2. 文本编码器：文本编码器使用类似于BERT或GPT这样的预训练Transformer模型来处理自然语言。文本编码器接收一个文本序列（例如单词或字）作为输入，并将其转换为一个高维向量。这个向量包含了输入文本中的语义信息。
+
+Clip通过将视觉编码器和文本编码器联合训练，学会了将图像和自然语言联系起来。这是通过对比学习来实现的，在训练过程中，Clip需要区分正确的图像-文本对（正例）和错误的图像-文本对（负例），并优化这两类对之间的相似度。
+
+### 7.2.3 预训练模型
+
+在预训练阶段，Clip模型使用大量的图像-文本对数据进行训练，以学会将视觉信息与自然语言信息关联起来。这些数据集通常包括多个领域的图像，如互联网中的图片、艺术品、卫星图像等，以及与这些图像相关的文本描述。这样的数据集可以帮助模型在训练过程中捕捉到丰富的视觉和语言知识。
+
+预训练的目标是通过对比学习来教会Clip如何区分正确的图像-文本对（正例）和错误的图像-文本对（负例）。训练过程中，Clip需要学会提高正例之间的相似度，同时降低负例之间的相似度。为了实现这一目标，Clip在预训练阶段使用了一种称为“对比损失函数”（contrastive loss function）的优化方法。
+
+![img](README.assets/1654497289222-fdc8b552-f596-4320-b885-72f2e6f7ffd9.png)
+
+通过这样的预训练，Clip学会了如何将图像和文本表示为相似度空间中的向量，使得相关的图像和文本向量在这个空间中靠近，而不相关的图像和文本向量则远离。这使得Clip具有了处理视觉和语言任务的能力，例如图像分类、文本生成以及文本到图像生成等。
+
+在预训练完成之后，Clip可以直接应用于多种任务，而无需进行任务特定的微调。这使得Clip在计算机视觉和自然语言处理领域具有很强的通用性和可扩展性。
+
+在我们的项目中，使用Hugging Face上的`openai/clip-vit-large-patch14`预训练模型的权重。
+
+
+
+## 7.3 PPOCR + Clip 在填空题模型的应用
+
+我们以前使用的模型是paddleOCR，它对写的较清晰的图片有很好的识别效果，但是，如果图片分辨率很差或者连笔、不清晰之类的情况出现，则很有可能出错，如下：
+
+<img src="README.assets/nationally.jpg" alt="nationally" style="zoom:200%;" />
+
+这个单词为“nationally”，但由于分辨率、连笔，OCR是被为"rationally"。
+
+这个星期我想到了一个方案，使用paddleOCR + clip进行填空题的判断，伪代码流程如下：
+
+```python
+answer = getanswer() # 获取正确答案
+predict = paddleocr(img) # 通过OCR获取预测的文本
+if (answer == predict):
+    <正确>
+else:
+    prompt_1 = "A picture with the text \"{answer}\""
+    prompt_2 = "A picture with the text \"{predict}\""
+    prompt_other = "A picture with the other text"
+    output = clip(prompt_1, prompt_2, prompt_other, img)
+    if (output == 0): # 第一个文本概率最大
+        <正确>
+    else:
+        <错误>
+```
+
+总的来说，就是使用clip在ocr模型之后当一个质检员，如果预测结果和答案不一样，那我们就让clip来判断，predict和answer两个字符串哪个和图片最接近。
+
+根据我个人测试，由于没有数据集，自己手写了9张低分辨率、易混淆的英文单词图片，单独采用paddleocr只有3/9的正确率，使用paddleocr + clip有9/9的正确率。鉴于这是很极限的测试，个人认为paddleocr + clip可满足实际用途。
+
+![image-20230309225810009](README.assets/image-20230309225810009.png)
+
+
+
+## 7.4 样例
+
+可以前往项目目录的`scoreblocks/fillblankmodel.py`中单独运行我们的PPOCR + Clip 填空题模型，也可以前往仓库填空题模型的[URL](https://github.com/vkgo/OCRAutoScore/blob/cb5c9c3e9ab7eeefeb992fda474ca7ebbc4b2c43/scoreblocks/fillblankmodel.py)进行查看，我们模型的部分源码如下：
+
+```python
+class model:
+    def __init__(self, language:str="en"):
+        """
+        :parameter language: the language of the text, `ch`, `en`, `french`, `german`, `korean`, `japan`, type: str
+        """
+
+    def recognize_text(self, _img:Image):
+        """
+        Predict the text from image
+        :parameter img: image, type: np.ndarray
+        :return: result, type: tuple{location: list, text: str}
+        """
+
+    def judge_with_clip(self, _answer:str, _predict:str, _img:Image):
+        """
+        Use clip to judge which one is more similar to the Image
+        :parameter answer: the answer text, type: str
+        :parameter predict: the predict text, type: str
+        :parameter img: image, type: np.ndarray
+        :return: result, the index of the more similar text, type: int
+        """
+
+if __name__ == "__main__":
+    """
+    用于测试函数
+    """
+    debug = True
+    import paddle
+    print(paddle.device.is_compiled_with_cuda())
+    model = model()
+    while True:
+        img_path = input("请输入图片路径: ")
+        answer = input("请输入正确答案: ")
+        img = Image.open(img_path)
+        predict = model.recognize_text(img)[1]
+        print("预测结果: ", predict)
+        if (predict != answer):
+            print("正确结果：", answer)
+            index = model.judge_with_clip(answer, predict, img)
+            print("判断结果: ", (answer, predict, "error")[index])
+```
+
+我们运行后仅需要输入要检测的图片的路径还有正确答案即可进行批改。
+
+如何运行：
+
+```shell
+cd .\scoreblocks\
+python .\fillblankmodel.py
+```
+
+测试图片：
+
+<img src="README.assets/nationally.jpg" alt="nationally" style="zoom:200%;" />
+
+运行结果：
+
+![image-20230422115112826](README.assets/image-20230422115112826.png)
+
+可见，PPOCR将其预测为`rationally`，而我们的Clip模型在`rationnally`和`nationally`的选择之下，最终选择了`nationally`。
 
 
 
 # 8 填空题模型-公式识别
-## 8.1 框架
+## 8.1 架构
 
 ![CAN模型框架](README.assets/CAN.png)
 在本项目中，结合了Li B(2022)提出的CAN（计数感知网络），我们实现了对log、e^x等较为复杂的公式的识别。CAN整合了两部分任务：手写公式识别和符号计数。具体来说，使用了一个弱监督的符号计数模块，它可以在没有符号位置的情况下预测每个符号类的数目。
@@ -226,6 +426,7 @@ python .\infer.py
 ## 8.3 运行
 
 该项目需要pytorch1.10.2+python3.6
+
 training：
 
 ```shell
@@ -238,7 +439,9 @@ python train --dataset=CROHME
 
 test:
 
+```shell
 python inference.py
+```
 
 # 9 作文评分模型
 
