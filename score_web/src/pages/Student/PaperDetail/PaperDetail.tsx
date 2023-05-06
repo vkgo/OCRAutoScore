@@ -1,16 +1,19 @@
 import React,{useState, useEffect} from 'react';
-import { Button, Image, Popconfirm, message } from 'antd'
+import { Button, Image, Popconfirm, Upload, message } from 'antd'
 import { useParams } from "react-router-dom";
 import './PaperDetail.less'
 import axios from 'axios';
 import ImageUpload from '@/components/ImageUpload/ImageUpload';
+import type { UploadFile } from 'antd/es/upload/interface';
+
 const PaperDetail: React.FC = () => {
     const paperId =  parseInt(useParams<{id: string}>()["id"])
     const [paperImages, setImageList] = useState([])
     const [open, setOpen] = useState(false);
     const [messageApi, contextHolder] = message.useMessage()
     const [score, setScore] = useState(-1);
-    
+    const [answers, setAnswers] = useState<UploadFile[]>([]);
+
     const getPaperPhotos = async () => {
         const result = await axios.request({
             url:"student/paper/detail",
@@ -22,8 +25,23 @@ const PaperDetail: React.FC = () => {
         }
     }
 
+    const getPaperAnswersBefore = async () => {
+        const result = await axios.request({
+            url: "student/paper/answer/detail",
+            method: "GET",
+            params: {
+                paperId: paperId,
+                username: window.sessionStorage.getItem('username')
+            }
+        })
+        if(result.data.msg === 'success') {
+            setAnswers(result.data.answerImages)
+        }
+    }
+
     useEffect(()=>{
         if(paperImages.length ===  0) getPaperPhotos()
+        if(answers.length === 0) getPaperAnswersBefore()
     })
 
     const waitingForScore = async() => {
@@ -47,6 +65,10 @@ const PaperDetail: React.FC = () => {
         
         setTimeout(()=>{messageApi.destroy();setScore(80);}, 3000)
     }
+
+    const handleAnswerChange = (newFiles) => {
+       setAnswers(newFiles);
+    };
     
     return (
         <div className="student_paper_detail">
@@ -63,7 +85,13 @@ const PaperDetail: React.FC = () => {
             </Image.PreviewGroup>
             <div>
                 <h3>请上传自己的答案</h3>
-                <ImageUpload data={{paperId, "username": window.sessionStorage.getItem("username")}} url={window.location.origin + '/api/student/answer/imageUpload'} showUploadButton={score<0}/> 
+                <ImageUpload 
+                    data={{paperId, "username": window.sessionStorage.getItem("username")}} 
+                    url={window.location.origin + '/api/student/answer/imageUpload'} 
+                    showUploadButton={score<0}
+                    fileList={answers}
+                    onFileChange={handleAnswerChange}
+                /> 
             </div>
             {
                 score < 0 ? (

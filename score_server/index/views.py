@@ -180,7 +180,16 @@ def showPaperDetail(request):
 
 @require_http_methods(["GET"])
 def showPaperAnsDetail(request):
-    pass
+    root_url = request.scheme + '://' + request.get_host()
+    paper_id = request.GET["paperId"]
+    username = request.GET["username"]
+    student = Student.objects.get(username=username)
+    paper = Paper.objects.get(id=paper_id)
+    photos = StudentUploadAnswerPhoto.objects.filter(paper=paper, student=student)
+    return JsonResponse({"msg": "success", "answerImages": [
+        {"url": root_url + settings.MEDIA_URL + "studentAns/" + photo.photoPath.split("/")[-1], "uid": photo.id}
+        for photo in photos
+    ]})
 
 
 @require_http_methods(["GET"])

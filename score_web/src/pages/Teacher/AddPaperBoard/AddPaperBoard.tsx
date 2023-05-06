@@ -5,7 +5,7 @@ import numToCN from '@/util/numToCN';
 import './AddPaperBoard.less'
 import axios from 'axios';
 import ImageUpload from '@/components/ImageUpload/ImageUpload';
-
+import type { UploadFile } from 'antd/es/upload/interface';
 const {TextArea} = Input;
 /**
  * 配置试卷
@@ -33,6 +33,7 @@ const AddPaperBoard: React.FC = () => {
     const [isSavePaper,setIsSavePaper] = useState(false);
     const [isSavePaperName, setIsSavePaperName] = useState(false);
     const [paperName, setPaperName] = useState("")
+    const [paperPhotos, setPaperPhotos] = useState<UploadFile[]>([]);
 
     const init = async() =>  {
         if(paperId === -1) {
@@ -295,6 +296,10 @@ const AddPaperBoard: React.FC = () => {
         }
     }
 
+    const handlePaperPhotosChange = (fileList:UploadFile[]) => {
+        setPaperPhotos(fileList)
+    }
+
     return (
         <div className='teacher_add_paper_board_body'>
             <h2>请上传你的试卷</h2>
@@ -306,7 +311,13 @@ const AddPaperBoard: React.FC = () => {
             </Space.Compact>
             <div className='photo_container'>
                 <h4>上传试卷图片</h4>
-                <ImageUpload data={{paperId}} url={window.location.origin + '/api/upload/imageUpload'} showUploadButton={true}/>
+                <ImageUpload 
+                    data={{paperId}} 
+                    url={window.location.origin + '/api/upload/imageUpload'} 
+                    showUploadButton={true}
+                    fileList={paperPhotos}
+                    onFileChange={handlePaperPhotosChange}
+                />
             </div>
             <div className='content_container'>
                 <h4>上传题目答案</h4>
