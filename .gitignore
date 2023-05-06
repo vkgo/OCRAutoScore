@@ -16,6 +16,8 @@ score_web/coverage
 # production
 score_web/build
 
+score_server/index/migrations
+
 # misc
 .DS_Store
 .env.local

@@ -89,7 +89,7 @@ const PaperDetail: React.FC = () => {
             >
                 {
                     paperImages.map(item => (
-                        <Image width={200} src={item.imgUrl} rootClassName='paper_image' key={item.id}/>
+                        <Image width={200} src={item.url} rootClassName='paper_image' key={item.uid}/>
                     ))
                 }
             </Image.PreviewGroup>

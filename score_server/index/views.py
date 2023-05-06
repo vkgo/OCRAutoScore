@@ -86,9 +86,10 @@ def image_upload(file_obj, folder):
 def paper_image_upload(request):
     file_obj = request.FILES.get("upload_image")
     name_obj = image_upload(file_obj, "paper")
+    print(name_obj)
     paper_id = request.POST["paperId"]
     paper = Paper.objects.get(id=paper_id)
-    PaperPhoto.objects.create(photoPath=name_obj["filename"], paper=paper)
+    PaperPhoto.objects.create(photoPath="/paper/" + name_obj["name"], paper=paper)
     return JsonResponse({"msg": 'success', 'data': {
         'url': request.build_absolute_uri("/media/paper/" + name_obj["name"]), 'name': name_obj["name"]}})
 
@@ -101,7 +102,7 @@ def student_image_upload(request):
     username = request.POST["username"]
     paper = Paper.objects.get(id=paper_id)
     student = Student.objects.get(username=username)
-    StudentUploadAnswerPhoto.objects.create(photoPath=name_obj["filename"], paper=paper, student=student)
+    StudentUploadAnswerPhoto.objects.create(photoPath="/studentAns/" + name_obj["name"], paper=paper, student=student)
     return JsonResponse({"msg": 'success', 'data': {
         'url': request.build_absolute_uri("/media/studentAns/" + name_obj["name"]), 'name': name_obj["name"]}})
 
@@ -174,7 +175,7 @@ def showPaperDetail(request):
     paper = Paper.objects.get(id=paper_id)
     photos = PaperPhoto.objects.filter(paper=paper)
     return JsonResponse({"msg": "success", "paperImages": [
-        {"imgUrl": root_url + settings.MEDIA_URL + "paper/" + photo.photoPath.split("/")[-1], "id": photo.id}
+        {"url": root_url + settings.MEDIA_URL + "paper/" + photo.photoPath.split("/")[-1], "uid": photo.id}
         for photo in photos
     ]})
 
@@ -229,7 +230,7 @@ def getScore(request):
     s.set_answer(answers_list)
     scores = []
     for photo in photos:
-        img = PIL.Image.open(photo.photoPath)
+        img = PIL.Image.open(settings.MEDIA_ROOT + photo.photoPath)
         total_result = s.get_score(img)
         print(total_result)
         scores.append(total_result)

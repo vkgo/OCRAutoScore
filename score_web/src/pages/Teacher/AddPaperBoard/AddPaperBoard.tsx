@@ -65,11 +65,11 @@ const AddPaperBoard: React.FC = () => {
 
     useEffect(()=>{
         init() 
-        return () => {
-            if (!isSavePaper && paperId !== -1) {
-                removePaper() 
-            }
-        }
+        // return () => {
+        //     if (!isSavePaper && paperId !== -1) {
+        //         removePaper() 
+        //     }
+        // }
     })
 
     /**
