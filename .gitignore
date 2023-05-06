@@ -13,9 +13,6 @@ migrations/
 # testing
 score_web/coverage
 
-# production
-score_web/build
-
 # misc
 .DS_Store
 .env.local
