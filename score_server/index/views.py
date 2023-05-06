@@ -8,7 +8,7 @@ from index.models import Student, Teacher, Paper, PaperPhoto, Problem, Answer, S
 from utils.util import tid_maker
 import sys
 sys.path.append('..')
-# from score import scoresystem
+from score import scoresystem
 
 
 @require_http_methods(["POST"])
@@ -169,7 +169,6 @@ def showPaperForStudent(request):
 @require_http_methods(["GET"])
 def showPaperDetail(request):
     root_url = request.scheme + '://' + request.get_host()
-    print("url: ", root_url)
     paper_id = request.GET["paperId"]
     paper = Paper.objects.get(id=paper_id)
     photos = PaperPhoto.objects.filter(paper=paper)
@@ -187,22 +186,27 @@ def showPaperAnsDetail(request):
 @require_http_methods(["GET"])
 def getScore(request):
     paper_id = request.GET["paperId"]
-    username = request.POST["username"]
+    username = request.GET["username"]
     student = Student.objects.get(username=username)
     paper = Paper.objects.get(id=paper_id)
     photos = StudentUploadAnswerPhoto.objects.filter(paper=paper, student=student)
+    print(photos)
     problems = Problem.objects.filter(paper=paper)
     answers_list = []
     for problem in problems:
         answer_obj_list = Answer.objects.filter(problem=problem)
-        answers = {'section': 'tkt', 'value': []}
+        answers = {'section': problem.type, 'value': []}
         for a in answer_obj_list:
             answers['value'].append(a.answer)
         answers_list.append(answers)
     # 调用模型
-    # s = scoresystem()
-    # s.set_answer(answers_list)
-    # scores = []
-    # for photo in photos:
-    #     img = PIL.Image.open(photo.photoPath)
-    #     s.get_score(img)
+    s = scoresystem()
+    s.set_answer(answers_list)
+    scores = []
+    for photo in photos:
+        img = PIL.Image.open(photo.photoPath)
+        total_result = s.get_score(img)
+        print(total_result)
+        scores.append(total_result)
+    return JsonResponse({"msg": "success", "score": scores})
+

@@ -306,7 +306,7 @@ const AddPaperBoard: React.FC = () => {
             </Space.Compact>
             <div className='photo_container'>
                 <h4>上传试卷图片</h4>
-                <ImageUpload data={{paperId}} url={window.location.origin + '/api/upload/imageUpload'}/>
+                <ImageUpload data={{paperId}} url={window.location.origin + '/api/upload/imageUpload'} showUploadButton={true}/>
             </div>
             <div className='content_container'>
                 <h4>上传题目答案</h4>

@@ -23,4 +23,6 @@ urlpatterns = [
     path('student/papers', views.showPaperForStudent),
     # 学生试卷图片获取
     path('student/paper/detail', views.showPaperDetail),
+    # 获取分数
+    path('student/paper/score', views.getScore)
 ]

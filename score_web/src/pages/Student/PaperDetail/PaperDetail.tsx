@@ -26,13 +26,26 @@ const PaperDetail: React.FC = () => {
         if(paperImages.length ===  0) getPaperPhotos()
     })
 
-    const waitingForScore = () => {
+    const waitingForScore = async() => {
+        setOpen(false);
         messageApi.open({
             type: 'loading',
             content: '正在评分中',
             duration: 0
         })
-        setTimeout(()=>{messageApi.destroy();setScore(80);}, 500)
+
+        const result = await axios.request({
+            url: 'student/paper/score',
+            method: 'GET',
+            params: {
+                paperId: paperId,
+                username: window.sessionStorage.getItem('username')
+            }
+        })
+
+        console.log(result)
+        
+        setTimeout(()=>{messageApi.destroy();setScore(80);}, 3000)
     }
     
     return (
