@@ -13,9 +13,6 @@ migrations/
 # testing
 score_web/coverage
 
-# production
-score_web/build
-
 score_server/index/migrations
 
 # misc
