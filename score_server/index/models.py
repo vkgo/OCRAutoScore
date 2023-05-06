@@ -28,6 +28,7 @@ class Paper(models.Model):
 
 class Problem(models.Model):
     paper = models.ForeignKey(to=Paper, on_delete=models.CASCADE)
+    type = models.CharField(max_length=3)
 
 
 class Answer(models.Model):

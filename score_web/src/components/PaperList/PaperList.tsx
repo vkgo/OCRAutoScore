@@ -44,16 +44,24 @@ const PaperList: React.FC<PaperListProps> = (props) => {
         <List
             dataSource={props.list}
             size="large"
-            renderItem={(item: PaperListItem) =>(
-                <List.Item key={item.id}>
-                    <List.Item.Meta
-                        avatar={<img src={require("@/assets/paper.png")} alt="试卷图标"/>}
-                        title={<span>{item.title}</span>}
-                        description={descriptionHtml(item)}
-                    />
-                    <Button type="primary" onClick={()=>{history.push(props.baseUrl+item.id)}}>点击查看</Button>
-                </List.Item>
-            )}    
+            renderItem={(item: PaperListItem) =>{
+                return (
+                    <>
+                        {
+                            item.title !== '' ?
+                                (<List.Item key={item.id}>
+                                    <List.Item.Meta
+                                        avatar={<img src={require("@/assets/paper.png")} alt="试卷图标"/>}
+                                        title={<span>{item.title}</span>}
+                                        description={descriptionHtml(item)}
+                                    />
+                                    <Button type="primary" onClick={()=>{history.push(props.baseUrl+item.id)}}>点击查看</Button>
+                                </List.Item>
+                                ): ''
+                        }
+                    </>
+                )
+            }}    
         />
     )
 }

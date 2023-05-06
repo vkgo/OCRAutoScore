@@ -1,4 +1,4 @@
-import { Button, Tree, InputNumber, Modal, Input, message, Alert,Space } from 'antd';
+import { Button, Tree, InputNumber, Modal, Input, message, Alert,Space, Select } from 'antd';
 import React, { useEffect, useState } from 'react';
 import range from '@/util/range';
 import numToCN from '@/util/numToCN';
@@ -15,6 +15,7 @@ const {TextArea} = Input;
 enum ModalContentState {
     closed = 0,
     setBigProblemNumber,
+    setBigProblemType,
     setSmallProblemNumber,
     setProblemAnswer
 }
@@ -22,6 +23,7 @@ const AddPaperBoard: React.FC = () => {
     // 上传答案相关
     const [isAnsModalOpen, setisAnsModalOpen] = useState(ModalContentState.closed);
     const [bigProblemNumber, setBigProblemNumber] = useState(1);
+    const [bigProblemTypeList, setBigProblemTypeList] = useState([]);
     const [smallProblemNumberPerBigProblemList, setSmallProblemNumberPerBigProblemList] = useState([]);
     const [answers, setAnswers] = useState([]);
     const [treeData, setTreeData] = useState([]);
@@ -83,6 +85,7 @@ const AddPaperBoard: React.FC = () => {
     // 点击ok, 当前值 + 1
     const handleAnsModalOk = () => {
         if(isAnsModalOpen === ModalContentState.setBigProblemNumber && bigProblemNumber !== smallProblemNumberPerBigProblemList.length) {
+            setBigProblemTypeList(Array(bigProblemNumber).fill("xzt"))
             // 初始化小题的数组
             setSmallProblemNumberPerBigProblemList(Array(bigProblemNumber).fill(1))
         }
@@ -120,7 +123,7 @@ const AddPaperBoard: React.FC = () => {
             axios.request({
                 url:"paper/answer/add",
                 method:'POST',
-                data: {"list": answers, "paperId": paperId}
+                data: {"answerList": answers, "paperId": paperId, "typeList": bigProblemTypeList}
             })
         }
         setisAnsModalOpen(current=> current + 1 > ModalContentState.setProblemAnswer ? ModalContentState.closed : current + 1);
@@ -135,6 +138,7 @@ const AddPaperBoard: React.FC = () => {
     const ModalContent = () => {
         switch (isAnsModalOpen) {
             case ModalContentState.setBigProblemNumber: return setBigProblemNumberModalContent()
+            case ModalContentState.setBigProblemType: return setBigProblemTypeModalContent()
             case ModalContentState.setSmallProblemNumber: return setSmallProblemNumberModalContent()
             case ModalContentState.setProblemAnswer: return setProblemAnswerModalContent()
             default: return ''
@@ -155,6 +159,32 @@ const AddPaperBoard: React.FC = () => {
     const onBigProblemNumberChange = (value: number) => {
         setBigProblemNumber(value)
         
+    }
+
+    // 设置大题题型的内容
+    const setBigProblemTypeModalContent = () => {
+        return (
+            <div>
+                <p>设置每道大题的题型</p>
+                <ol style={{display: 'grid', gridTemplateColumns: '30% 30% 30%'}}>
+                    {range({end: bigProblemNumber}).map((n,index)=><li key={index} style={{marginBottom: '12px',marginRight:'5px'}}>
+                        <Select defaultValue={bigProblemTypeList[n]} style={{width: 100}} onChange={value=>handleBigProblemTypeChange(value,n)} options={[
+                            {value: 'xzt', label: '选择题'},
+                            {value: 'tkt', label: '填空题'},
+                            {value: 'zwt', label: '作文题'}
+                        ]}/>
+                    </li>
+                    )}
+                </ol>
+            </div>
+        )
+    }
+
+    const handleBigProblemTypeChange = (value: string, index: number) => {
+        let tempArray = bigProblemTypeList;
+        tempArray[index] = value;
+        console.log(tempArray);
+        setBigProblemTypeList(tempArray);
     }
 
     // 设置小题数量的内容
@@ -178,7 +208,6 @@ const AddPaperBoard: React.FC = () => {
     const setProblemAnswerModalContent = () => {
         return (
             <div>
-                
                 <p>设置每道题的答案</p>
                 <ol>
                     {range({end: bigProblemNumber}).map(i=> (
@@ -189,14 +218,20 @@ const AddPaperBoard: React.FC = () => {
                                     {range({end: smallProblemNumberPerBigProblemList[i]}).map((j,index)=>(
                                         <div key={index}>
                                             <span>{i+1}.{j+1}</span>
-                                            <TextArea rows={4} placeholder="请输入对应的答案" defaultValue={answers[i][j]} onChange={e=>onAnswerChange(e.target.value,i,j)}/>   
+                                            {bigProblemTypeList[i]==='zwt'
+                                                ?<TextArea rows={4} placeholder="请输入对应的答案" defaultValue={answers[i][j]} onChange={e=>onAnswerChange(e.target.value,i,j)}/>
+                                                :<Input placeholder="请输入对应的答案" defaultValue={answers[i][j]} onChange={e=>onAnswerChange(e.target.value,i,j)}/>
+                                            }
                                         </div>
                                     ))}
                                 </div>
                                 ) : (
                                 <div>
                                     <p>请输入第{numToCN(i+1)}题答案</p>
-                                    <TextArea rows={4} defaultValue={answers[i][0]} onChange={e=>onAnswerChange(e.target.value,i,0)}/>
+                                    {bigProblemTypeList[i]==='zwt'
+                                        ?<TextArea rows={4} placeholder="请输入对应的答案" defaultValue={answers[i][0]} onChange={e=>onAnswerChange(e.target.value,i,0)}/>
+                                        :<Input placeholder="请输入对应的答案" defaultValue={answers[i][0]} onChange={e=>onAnswerChange(e.target.value,i,0)}/>
+                                    }
                                 </div>
                             )}
                         </li>

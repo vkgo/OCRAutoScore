@@ -8,7 +8,7 @@ from index.models import Student, Teacher, Paper, PaperPhoto, Problem, Answer, S
 from utils.util import tid_maker
 import sys
 sys.path.append('..')
-from score import scoresystem
+# from score import scoresystem
 
 
 @require_http_methods(["POST"])
@@ -120,10 +120,13 @@ def ans_set(request):
     Problem.objects.filter(paper=paper).delete()
 
     # 新设置问题和答案
-    answer_list = body["list"]
-    for ans in answer_list:
-        problem = Problem.objects.create(paper=paper)
-        for a in ans:
+    answer_list = body["answerList"]
+    type_list = body["typeList"]
+
+    for ans_index in range(len(answer_list)):
+        problem_type = type_list[ans_index]
+        problem = Problem.objects.create(paper=paper, type=problem_type)
+        for a in answer_list[ans_index]:
             Answer.objects.create(problem=problem, answer=a)
 
     return JsonResponse({"msg": "success"})
@@ -197,9 +200,9 @@ def getScore(request):
             answers['value'].append(a.answer)
         answers_list.append(answers)
     # 调用模型
-    s = scoresystem()
-    s.set_answer(answers_list)
-    scores = []
-    for photo in photos:
-        img = PIL.Image.open(photo.photoPath)
-        s.get_score(img)
+    # s = scoresystem()
+    # s.set_answer(answers_list)
+    # scores = []
+    # for photo in photos:
+    #     img = PIL.Image.open(photo.photoPath)
+    #     s.get_score(img)
