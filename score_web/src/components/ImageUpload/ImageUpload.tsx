@@ -5,7 +5,8 @@ import type { UploadFile } from 'antd/es/upload/interface';
 
 interface ImageUploadPropsInterface {
     url: string,
-    data: {paperId: number, username?: string}
+    data: {paperId: number, username?: string},
+    showUploadButton?: boolean,
 }
 
 const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
@@ -63,7 +64,7 @@ const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
             onPreview={handlePhotoPreview}  
             onChange={handlePhotoChange}
         >
-            {fileList.length >= 100 ? null : uploadButton}
+            {props.showUploadButton ? uploadButton : false}
         </Upload>
         <Modal open={imagePreviewOpen} footer={null} onCancel={handlePhotoModalCancel}>
             <img alt="example" style={{ width: '100%' }} src={previewImage} />

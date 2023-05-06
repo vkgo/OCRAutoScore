@@ -1,5 +1,5 @@
 import React,{useState, useEffect} from 'react';
-import { Button, Image, Popconfirm } from 'antd'
+import { Button, Image, Popconfirm, message } from 'antd'
 import { useParams } from "react-router-dom";
 import './PaperDetail.less'
 import axios from 'axios';
@@ -8,6 +8,8 @@ const PaperDetail: React.FC = () => {
     const paperId =  parseInt(useParams<{id: string}>()["id"])
     const [paperImages, setImageList] = useState([])
     const [open, setOpen] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage()
+    const [score, setScore] = useState(-1);
     
     const getPaperPhotos = async () => {
         const result = await axios.request({
@@ -23,6 +25,15 @@ const PaperDetail: React.FC = () => {
     useEffect(()=>{
         if(paperImages.length ===  0) getPaperPhotos()
     })
+
+    const waitingForScore = () => {
+        messageApi.open({
+            type: 'loading',
+            content: '正在评分中',
+            duration: 0
+        })
+        setTimeout(()=>{messageApi.destroy();setScore(80);}, 500)
+    }
     
     return (
         <div className="student_paper_detail">
@@ -39,21 +50,31 @@ const PaperDetail: React.FC = () => {
             </Image.PreviewGroup>
             <div>
                 <h3>请上传自己的答案</h3>
-                <ImageUpload data={{paperId, "username": window.sessionStorage.getItem("username")}} url={window.location.origin + '/api/student/answer/imageUpload'}/> 
+                <ImageUpload data={{paperId, "username": window.sessionStorage.getItem("username")}} url={window.location.origin + '/api/student/answer/imageUpload'} showUploadButton={score<0}/> 
             </div>
-            <div className="button_group">
-                <Popconfirm
-                    title="提醒"
-                    description="确定要提交答案, 不检查一下？"
-                    open={open}
-                    onCancel={()=>setOpen(false)}
-                    >
-                    <Button type="primary" onClick={()=>setOpen(true)}>
-                        提交答案
-                    </Button>
-                </Popconfirm>
-            </div>
-            
+            {
+                score < 0 ? (
+                <div className="button_group">
+                    <Popconfirm
+                        title="提醒"
+                        description="确定要提交答案, 不检查一下？"
+                        open={open}
+                        onConfirm={()=>waitingForScore()}
+                        onCancel={()=>setOpen(false)}
+                        >
+                        <Button type="primary" onClick={()=>setOpen(true)}>
+                            提交答案
+                        </Button>
+                    </Popconfirm>
+                </div>
+                ) : (
+                    <div>
+                        <h3>分数</h3>
+                        <p>你的分数是 {score}</p>
+                    </div>
+                )
+            }
+            {contextHolder}
         </div>
         
     )
