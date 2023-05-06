@@ -10,16 +10,16 @@ class model:
     def __init__(self):
         # self.model_name=name
         # self.model=torch.load(path)
-        self.params=load_config('./CAN/config.yaml')
+        self.params=load_config('../CAN/config.yaml')
         # params['device'] = device
-        self.words = Words('./scoreblocks/CAN/words_dict.txt')
+        self.words = Words('../scoreblocks/CAN/words_dict.txt')
         self.params['word_num'] = len(self.words)
         self.params['device']='cpu'
         if 'use_label_mask' not in self.params:
             self.params['use_label_mask'] = False
         # print(params['decoder']['net'])
         self.model = Inference(self.params, draw_map=False)
-        load_checkpoint(self.model,None,'./CAN/checkpoints/demo.pth')
+        load_checkpoint(self.model,None,'../CAN/checkpoints/demo.pth')
         # self.model.cpu()
     def output(self,img_path):
         img=cv2.imread(img_path)

@@ -15,7 +15,7 @@ class mainplm(nn.Module):
         super(mainplm, self).__init__()
         self.args = args
         self.plm_batch_size = 1
-        self.plm = AutoModel.from_pretrained(self.args['PLM'])
+        self.plm = AutoModel.from_pretrained(self.args['plm'])
 
         for param in self.plm.embeddings.parameters():
             param.requires_grad = False

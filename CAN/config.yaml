@@ -36,7 +36,7 @@ train_label_path: 'datasets/CROHME/train_labels.txt'
 eval_image_path: 'datasets/test_images/'
 eval_label_path: 'datasets/test_labels.txt'
 
-word_path: './scoreblocks/CAN/words_dict.txt'
+word_path: '../scoreblocks/CAN/words_dict.txt'
 
 # collate_fn
 collate_fn: collate_fn
