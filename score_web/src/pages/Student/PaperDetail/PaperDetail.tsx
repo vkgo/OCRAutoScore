@@ -1,5 +1,5 @@
 import React,{useState, useEffect} from 'react';
-import { Button, Image, Popconfirm, Upload, message } from 'antd'
+import { Button, Image, Popconfirm, message } from 'antd'
 import { useParams } from "react-router-dom";
 import './PaperDetail.less'
 import axios from 'axios';
@@ -66,9 +66,19 @@ const PaperDetail: React.FC = () => {
         setTimeout(()=>{messageApi.destroy();setScore(80);}, 3000)
     }
 
-    const handleAnswerChange = (newFiles) => {
+    const handleAnswerChange = (newFiles: UploadFile[]): void => {
        setAnswers(newFiles);
     };
+
+    const handlePhotoRemove = async (file:UploadFile) => {
+        await axios.request({
+            method: 'GET', 
+            url: 'student/paper/answer/delete',
+            params: {
+                "answerId": file.uid
+            }
+        })
+    }
     
     return (
         <div className="student_paper_detail">
@@ -91,6 +101,7 @@ const PaperDetail: React.FC = () => {
                     showUploadButton={score<0}
                     fileList={answers}
                     onFileChange={handleAnswerChange}
+                    handleFileRemove={handlePhotoRemove}
                 /> 
             </div>
             {

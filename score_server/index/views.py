@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 import PIL.Image
 from django.conf import settings
@@ -190,6 +191,21 @@ def showPaperAnsDetail(request):
         {"url": root_url + settings.MEDIA_URL + "studentAns/" + photo.photoPath.split("/")[-1], "uid": photo.id}
         for photo in photos
     ]})
+
+
+@require_http_methods(["GET"])
+def deletePaperAnsPhoto(request):
+    answer_id = request.GET["answerId"]
+    photo = StudentUploadAnswerPhoto.objects.get(id=answer_id)
+    if photo:
+        try:
+            os.remove(photo.photoPath)
+            photo.delete()
+            return JsonResponse({"msg": "success"})
+        except Exception as e:
+            return JsonResponse({"msg": str(e)})
+    else:
+        return JsonResponse({"msg": "fail"})
 
 
 @require_http_methods(["GET"])

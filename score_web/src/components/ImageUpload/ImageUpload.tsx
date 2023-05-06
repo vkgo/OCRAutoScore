@@ -9,6 +9,7 @@ interface ImageUploadPropsInterface {
     showUploadButton?: boolean,
     fileList: UploadFile[],
     onFileChange: (files: UploadFile[]) => void
+    handleFileRemove ?: (files: UploadFile) => void
 }
 
 const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
@@ -63,6 +64,7 @@ const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
             fileList={props.fileList}
             onPreview={handlePhotoPreview}  
             onChange={handlePhotoChange}
+            onRemove={props.handleFileRemove}
         >
             {props.showUploadButton ? uploadButton : false}
         </Upload>

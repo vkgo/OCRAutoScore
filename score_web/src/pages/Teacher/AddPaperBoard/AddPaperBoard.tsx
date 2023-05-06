@@ -67,12 +67,10 @@ const AddPaperBoard: React.FC = () => {
         init() 
         return () => {
             if (!isSavePaper && paperId !== -1) {
-                // console.log("bbb")
-                // console.log("paperId", paperId)
                 removePaper() 
             }
         }
-    },[])
+    })
 
     /**
      *  Modal 配置函数
