@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.views.static import serve
+from django.views.generic import TemplateView
 
 from score_server import settings
 
@@ -24,4 +25,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/", include('index.urls')),
     url(r'media/(?P<path>.*)', serve, {"document_root": settings.MEDIA_ROOT}),
+    re_path("^$", TemplateView.as_view(template_name="index.html"))
 ]

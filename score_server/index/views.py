@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 import PIL.Image
 from django.conf import settings
@@ -85,9 +86,10 @@ def image_upload(file_obj, folder):
 def paper_image_upload(request):
     file_obj = request.FILES.get("upload_image")
     name_obj = image_upload(file_obj, "paper")
+    print(name_obj)
     paper_id = request.POST["paperId"]
     paper = Paper.objects.get(id=paper_id)
-    PaperPhoto.objects.create(photoPath=name_obj["filename"], paper=paper)
+    PaperPhoto.objects.create(photoPath="/paper/" + name_obj["name"], paper=paper)
     return JsonResponse({"msg": 'success', 'data': {
         'url': request.build_absolute_uri("/media/paper/" + name_obj["name"]), 'name': name_obj["name"]}})
 
@@ -100,7 +102,7 @@ def student_image_upload(request):
     username = request.POST["username"]
     paper = Paper.objects.get(id=paper_id)
     student = Student.objects.get(username=username)
-    StudentUploadAnswerPhoto.objects.create(photoPath=name_obj["filename"], paper=paper, student=student)
+    StudentUploadAnswerPhoto.objects.create(photoPath="/studentAns/" + name_obj["name"], paper=paper, student=student)
     return JsonResponse({"msg": 'success', 'data': {
         'url': request.build_absolute_uri("/media/studentAns/" + name_obj["name"]), 'name': name_obj["name"]}})
 
@@ -120,10 +122,13 @@ def ans_set(request):
     Problem.objects.filter(paper=paper).delete()
 
     # 新设置问题和答案
-    answer_list = body["list"]
-    for ans in answer_list:
-        problem = Problem.objects.create(paper=paper)
-        for a in ans:
+    answer_list = body["answerList"]
+    type_list = body["typeList"]
+
+    for ans_index in range(len(answer_list)):
+        problem_type = type_list[ans_index]
+        problem = Problem.objects.create(paper=paper, type=problem_type)
+        for a in answer_list[ans_index]:
             Answer.objects.create(problem=problem, answer=a)
 
     return JsonResponse({"msg": "success"})
@@ -166,33 +171,57 @@ def showPaperForStudent(request):
 @require_http_methods(["GET"])
 def showPaperDetail(request):
     root_url = request.scheme + '://' + request.get_host()
-    print("url: ", root_url)
     paper_id = request.GET["paperId"]
     paper = Paper.objects.get(id=paper_id)
     photos = PaperPhoto.objects.filter(paper=paper)
     return JsonResponse({"msg": "success", "paperImages": [
-        {"imgUrl": root_url + settings.MEDIA_URL + "paper/" + photo.photoPath.split("/")[-1], "id": photo.id}
+        {"url": root_url + settings.MEDIA_URL + "paper/" + photo.photoPath.split("/")[-1], "uid": photo.id}
         for photo in photos
     ]})
 
 
 @require_http_methods(["GET"])
 def showPaperAnsDetail(request):
-    pass
+    root_url = request.scheme + '://' + request.get_host()
+    paper_id = request.GET["paperId"]
+    username = request.GET["username"]
+    student = Student.objects.get(username=username)
+    paper = Paper.objects.get(id=paper_id)
+    photos = StudentUploadAnswerPhoto.objects.filter(paper=paper, student=student)
+    return JsonResponse({"msg": "success", "answerImages": [
+        {"url": root_url + settings.MEDIA_URL + "studentAns/" + photo.photoPath.split("/")[-1], "uid": photo.id}
+        for photo in photos
+    ]})
+
+
+@require_http_methods(["GET"])
+def deletePaperAnsPhoto(request):
+    answer_id = request.GET["answerId"]
+    photo = StudentUploadAnswerPhoto.objects.get(id=answer_id)
+    if photo:
+        try:
+            os.remove(photo.photoPath)
+            photo.delete()
+            return JsonResponse({"msg": "success"})
+        except Exception as e:
+            return JsonResponse({"msg": str(e)})
+    else:
+        return JsonResponse({"msg": "fail"})
 
 
 @require_http_methods(["GET"])
 def getScore(request):
     paper_id = request.GET["paperId"]
-    username = request.POST["username"]
+    username = request.GET["username"]
     student = Student.objects.get(username=username)
     paper = Paper.objects.get(id=paper_id)
     photos = StudentUploadAnswerPhoto.objects.filter(paper=paper, student=student)
+    print(photos)
     problems = Problem.objects.filter(paper=paper)
     answers_list = []
     for problem in problems:
         answer_obj_list = Answer.objects.filter(problem=problem)
-        answers = {'section': 'tkt', 'value': []}
+        answers = {'section': problem.type, 'value': []}
         for a in answer_obj_list:
             answers['value'].append(a.answer)
         answers_list.append(answers)
@@ -201,5 +230,9 @@ def getScore(request):
     s.set_answer(answers_list)
     scores = []
     for photo in photos:
-        img = PIL.Image.open(photo.photoPath)
-        s.get_score(img)
+        img = PIL.Image.open(settings.MEDIA_ROOT + photo.photoPath)
+        total_result = s.get_score(img)
+        print(total_result)
+        scores.append(total_result)
+    return JsonResponse({"msg": "success", "score": scores})
+

@@ -18,7 +18,7 @@ const PaperLibrary: React.FC = () => {
     return (
         <div>
             <h2>题库</h2>
-            <PaperList baseUrl='/student/papers/detail/' list={papers}/>
+            <PaperList baseUrl='/student/papers/detail/' list={papers} buttonText='点击作答' showDeleteButton={false}/>
         </div>
     )
 }

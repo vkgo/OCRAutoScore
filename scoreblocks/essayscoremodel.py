@@ -1,3 +1,5 @@
+import configparser
+
 import torch
 import torch.nn as nn
 from transformers import AutoModel
@@ -8,33 +10,62 @@ from scoreblocks.MSPLM.plms import mainplm
 from torch.cuda.amp import autocast
 
 
-def _initialize_arguments(p: configargparse.ArgParser):
-    p.add('--bert_model_path', help='bert_model_path')
-    p.add('--efl_encode', action='store_true', help='is continue training')
-    p.add('--r_dropout', help='r_dropout', type=float)
-    p.add('--batch_size', help='batch_size', type=int)
-    p.add('--plm_batch_size', help='plm_batch_size', type=int)
-    p.add('--cuda', action='store_true', help='use gpu or not')
-    p.add('--device')
-    p.add('--test_file', help='test data file')
-    p.add('--data_sample_rate', help='data_sample_rate', type=float)
-    p.add('--prompt', help='prompt')
-    p.add('--chunk_sizes', help='chunk_sizes', type=str)
-    p.add('--train_epoch', help='train_epoch', type=int)
-    p.add('--lr_0', help='lr_0', type=float)
-    p.add('--lr_1', help='lr_1', type=float)
-    p.add('--w1', help='w1', type=float)
-    p.add('--w2', help='w2', type=float)
-    p.add('--w3', help='w3', type=float)
-    p.add('--PLM', help='PLM', type=str)
+def _initialize_arguments(p):
+    p.add_section('bert_model_path')
+    p.add_section('efl_encode')
+    p.add_section('r_dropout')
+    p.add_section('batch_size')
+    p.add_section('plm_batch_size')
+    p.add_section('cuda')
+    p.add_section('device')
+    p.add_section('test_file')
+    p.add_section('data_sample_rate')
+    p.add_section('prompt')
+    p.add_section('chunk_sizes')
+    p.add_section('train_epoch')
+    p.add_section('lr_0')
+    p.add_section('lr_1')
+    p.add_section('w1')
+    p.add_section('w2')
+    p.add_section('w3')
+    p.add_section('PLM')
 
-    args = p.parse_args()
+    # p.add('--bert_model_path', help='bert_model_path')
+    # p.add('--efl_encode', action='store_true', help='is continue training')
+    # p.add('--r_dropout', help='r_dropout', type=float)
+    # p.add('--batch_size', help='batch_size', type=int)
+    # p.add('--plm_batch_size', help='plm_batch_size', type=int)
+    # p.add('--cuda', action='store_true', help='use gpu or not')
+    # p.add('--device')
+    # p.add('--test_file', help='test data file')
+    # p.add('--data_sample_rate', help='data_sample_rate', type=float)
+    # p.add('--prompt', help='prompt')
+    # p.add('--chunk_sizes', help='chunk_sizes', type=str)
+    # p.add('--train_epoch', help='train_epoch', type=int)
+    # p.add('--lr_0', help='lr_0', type=float)
+    # p.add('--lr_1', help='lr_1', type=float)
+    # p.add('--w1', help='w1', type=float)
+    # p.add('--w2', help='w2', type=float)
+    # p.add('--w3', help='w3', type=float)
+    # p.add('--PLM', help='PLM', type=str)
 
-    if torch.cuda.is_available() and args.cuda:
-        args.device = 'cuda'
+    # args = p.parse_args()
+
+    # 将ConfigParser对象转换为字典
+    config_dict = {}
+    for section in p.sections():
+        section_dict = {}
+        for option in p.options(section):
+            section_dict[option] = p.get(section, option)
+        config_dict[section] = section_dict
+    config_dict = config_dict['p1']
+    print(config_dict)
+
+    if torch.cuda.is_available() and config_dict['cuda']:
+        config_dict['device'] = 'cuda'
     else:
-        args.device = 'cpu'
-    return args
+        config_dict['device'] = 'cpu'
+    return config_dict
 
 def init_weights(m):
     if isinstance(m, nn.Linear):
@@ -43,19 +74,24 @@ def init_weights(m):
 class model:
     def __init__(self):
         # initialize arguments
-        p = configargparse.ArgParser(default_config_files=["./scoreblocks/MSPLM/ini/p1.ini"])
-        args = _initialize_arguments(p)
-        print(f'device:{args.device} torch_version:{torch.__version__}')
+        #p = configargparse.ArgParser(default_config_files=["../scoreblocks/MSPLM/ini/p1.ini"])
+        # 创建ConfigParser对象
+        p = configparser.ConfigParser()
+        # 读取ini文件
+        p.read("../scoreblocks/MSPLM/ini/p1.ini", encoding='utf-8')
+        self.args = _initialize_arguments(p)
+        print(f"device:{self.args['device']} torch_version:{torch.__version__}")
 
-        if args is not None:
-            self.args = vars(args)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.args['PLM'])
-        self.prompt = int(args.prompt[1])
+        # if args is not None:
+        #     self.args = vars(args)
+
+        self.tokenizer = AutoTokenizer.from_pretrained(self.args['plm'])
+        self.prompt = int(self.args["prompt"][1])
         self.chunk_sizes = []
         self.bert_batch_sizes = []
         # 载入模型
         self.bert_regression_by_word_document = mainplm(self.args)
-        self.bert_regression_by_word_document.load_state_dict(torch.load('./scoreblocks/MSPLM/prediction/p1/val0test1/best_total.bin'))
+        self.bert_regression_by_word_document.load_state_dict(torch.load('../scoreblocks/MSPLM/prediction/p1/val0test1/best_total.bin'))
         self.bert_regression_by_word_document.to(self.args['device'])
         self.bert_regression_by_word_document.eval()
 

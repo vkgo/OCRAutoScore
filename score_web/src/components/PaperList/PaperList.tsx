@@ -1,11 +1,14 @@
 import PaperListItem from "@/ts/interface/paperListItem_interface";
 import React from "react";
-import {List, Button } from 'antd'
+import {List, Button, Space } from 'antd'
 import './PaperList.less'
 import { useHistory } from 'react-router-dom';
 interface PaperListProps {
     baseUrl:string,
-    list?: PaperListItem[]
+    list?: PaperListItem[],
+    buttonText:string,
+    showDeleteButton:boolean,
+    deleteFunction?: (id:number) => void
 }
 const PaperList: React.FC<PaperListProps> = (props) => {
     const history = useHistory()
@@ -44,16 +47,27 @@ const PaperList: React.FC<PaperListProps> = (props) => {
         <List
             dataSource={props.list}
             size="large"
-            renderItem={(item: PaperListItem) =>(
-                <List.Item key={item.id}>
-                    <List.Item.Meta
-                        avatar={<img src={require("@/assets/paper.png")} alt="试卷图标"/>}
-                        title={<span>{item.title}</span>}
-                        description={descriptionHtml(item)}
-                    />
-                    <Button type="primary" onClick={()=>{history.push(props.baseUrl+item.id)}}>点击查看</Button>
-                </List.Item>
-            )}    
+            renderItem={(item: PaperListItem) =>{
+                return (
+                    <>
+                        {
+                            item.title !== '' ?
+                                (<List.Item key={item.id}>
+                                    <List.Item.Meta
+                                        avatar={<img src={require("@/assets/paper.png")} alt="试卷图标"/>}
+                                        title={<span>{item.title}</span>}
+                                        description={descriptionHtml(item)}
+                                    />
+                                    <Space>
+                                        <Button type="primary" onClick={()=>{history.push(props.baseUrl+item.id)}}>{props.buttonText}</Button>
+                                        {props.showDeleteButton ? <Button type="primary" danger onClick={()=>props.deleteFunction(item.id)}>删除试卷</Button>:''}
+                                    </Space>
+                                </List.Item>
+                                ): ''
+                        }
+                    </>
+                )
+            }}    
         />
     )
 }

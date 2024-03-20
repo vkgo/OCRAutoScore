@@ -5,16 +5,18 @@ import type { UploadFile } from 'antd/es/upload/interface';
 
 interface ImageUploadPropsInterface {
     url: string,
-    data: {paperId: number, username?: string}
+    data: {paperId: number, username?: string},
+    showUploadButton?: boolean,
+    fileList: UploadFile[],
+    onFileChange: (files: UploadFile[]) => void
+    handleFileRemove ?: (files: UploadFile) => void
 }
 
 const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
     const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
-    const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-    const handlePhotoPreview = (file) => {
-        console.log(file.url);
+    const handlePhotoPreview = (file:UploadFile) => {
         setPreviewImage(file.url||file.thumbUrl)
         setImagePreviewOpen(true)
     }
@@ -48,7 +50,7 @@ const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
                 message.error('上传图片失败')
             }
         } 
-        setFileList(fileList)
+        props.onFileChange(fileList);
     } 
 
     return (
@@ -59,11 +61,12 @@ const ImageUpload:React.FC<ImageUploadPropsInterface> = (props) =>{
             action={props.url} 
             data = {props.data}
             listType="picture-card" 
-            fileList={fileList}
+            fileList={props.fileList}
             onPreview={handlePhotoPreview}  
             onChange={handlePhotoChange}
+            onRemove={props.handleFileRemove}
         >
-            {fileList.length >= 100 ? null : uploadButton}
+            {props.showUploadButton ? uploadButton : false}
         </Upload>
         <Modal open={imagePreviewOpen} footer={null} onCancel={handlePhotoModalCancel}>
             <img alt="example" style={{ width: '100%' }} src={previewImage} />
