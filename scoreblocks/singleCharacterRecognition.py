@@ -10,6 +10,7 @@ from scoreblocks.CharacterRecognition.model_new import *
 class Model:
     def __init__(self, path, name):
         self.model_name = name
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self.model_name == 'WaveMix':
             self.model = WaveMix(
                 num_classes=27,
@@ -21,7 +22,8 @@ class Model:
             )
         elif self.model_name == 'SpinalVGG':
             self.model = SpinalVGG(27)
-        self.model.load_state_dict(torch.load(path))
+        self.model.load_state_dict(torch.load(path, map_location=self.device))
+        self.model.to(self.device)
         # self.model.cpu()
         self.transforms = transforms.Compose([torchvision.transforms.ToTensor(),
                                               torchvision.transforms.Normalize(
@@ -49,7 +51,7 @@ class Model:
         # 格式转换
         inp = self.transforms(binary)
         inp = torch.unsqueeze(inp, 0)
-        inp = inp.cuda()
+        inp = inp.to(self.device)
         # 检测
         self.model.eval()
         with torch.no_grad():
