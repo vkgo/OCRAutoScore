@@ -37,6 +37,7 @@ if __name__ == '__main__':
             img = cv2.imread(img_path)
             imgs += [img]
         results = outer_segmentation.get_segmentation(imgs)
+        imgs = []
 
         # 从results中提取出标签为3: 'objective_problem'的box，并从原图中裁剪出来，然后展示到屏幕上
         for result in results:
@@ -49,3 +50,4 @@ if __name__ == '__main__':
                     img = img[int(y1):int(y2), int(x1):int(x2)]
                     # 保存img到目标文件夹，文件名随机生成
                     cv2.imwrite(os.path.join(save_folder, str(random.randint(0, 1000000))+'.jpg'), img)
+        results = []
