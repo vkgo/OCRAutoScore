@@ -25,33 +25,29 @@ class Model:
         self.name = ''
         return result
 
-    def __preProcessing(self, img_path, name):  # 图片预处理，输出二值图
-        img = cv2.imread(img_path)
+    def __preProcessing(self, img_source, name=None):  # 图片预处理，输出二值图
+        if isinstance(img_source, (str, os.PathLike)):
+            img = cv2.imread(os.fspath(img_source))
+            self.name = name
+        else:
+            img = img_source
+            if name is not None:
+                self.name = name
         self.img = img
-        self.name = name
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(gray, (5, 5), 1.5)
         _, binary = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         thresh, binary = cv2.threshold(blur, int(_ * 0.95), 255, cv2.THRESH_BINARY)
         return binary
 
-    def process_img(self, img):
-        self.__preProcessing_img(img)
-        binary = self.__preProcessing_img(img)
+    def process_img(self, img, name=None):
+        binary = self.__preProcessing(img, name)
         horizon = self.__detectLines(binary)
         self.__contourExtraction(horizon)
         result = self.__segmentation()
         self.rects.clear()
         self.img = None
         return result
-
-    def __preProcessing_img(self, img):  # 图片预处理，输出二值图
-        self.img = img
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (5, 5), 1.5)
-        _, binary = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        thresh, binary = cv2.threshold(blur, int(_ * 0.95), 255, cv2.THRESH_BINARY)
-        return binary
 
     @staticmethod
     def __detectLines(img):  # 检测水平线
