@@ -149,7 +149,7 @@ class scoresystem:
                             section_img = section_img[int(y1):int(y2), int(x1):int(x2)]
                             # 涂改选择题模型
                             pass
-            return total_result
+        return total_result
 
 
 
